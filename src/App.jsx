@@ -1,476 +1,507 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  background: #f5f8f6;
-  color: #17211c;
-}
-
-button,
-input,
-select {
-  font-family: inherit;
-}
-
-.app {
-  min-height: 100vh;
-}
-
-.topbar {
-  background: #ffffff;
-  border-bottom: 1px solid #e5ebe7;
-  padding: 24px 6%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  font-size: 23px;
-  font-weight: 800;
-  letter-spacing: -1px;
-}
-
-.logo span {
-  color: #16a34a;
-}
-
-.subtitle {
-  margin: 4px 0 0;
-  color: #7a857f;
-  font-size: 12px;
-}
-
-.header-badge {
-  background: #ecfdf3;
-  color: #15803d;
-  padding: 9px 14px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.container {
-  width: min(1200px, 88%);
-  margin: 35px auto 60px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: white;
-  border: 1px solid #e5ebe7;
-  border-radius: 18px;
-  padding: 24px;
-}
-
-.stat-card.primary {
-  background: #166534;
-  color: white;
-  border: none;
-}
-
-.stat-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #7a857f;
-}
-
-.primary .stat-label {
-  color: #bbf7d0;
-}
-
-.stat-value {
-  font-size: 34px;
-  font-weight: 800;
-  margin: 12px 0 8px;
-  letter-spacing: -1.5px;
-}
-
-.stat-value.small {
-  font-size: 25px;
-}
-
-.stat-value span {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.stat-bottom {
-  font-size: 12px;
-  color: #7a857f;
-}
-
-.primary .stat-bottom {
-  color: #dcfce7;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: white;
-  border: 1px solid #e5ebe7;
-  border-radius: 18px;
-  padding: 25px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.card-header h2 {
-  margin: 0;
-  font-size: 17px;
-}
-
-.card-header p {
-  margin: 5px 0 0;
-  font-size: 12px;
-  color: #8a938d;
-}
-
-.card-icon {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: #ecfdf3;
-  color: #16a34a;
-  font-size: 22px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.form-group {
-  margin-bottom: 17px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #4c5750;
-}
-
-input,
-select {
-  width: 100%;
-  height: 46px;
-  border: 1px solid #d9e1dc;
-  border-radius: 10px;
-  padding: 0 13px;
-  background: white;
-  color: #17211c;
-  outline: none;
-  transition: 0.2s ease;
-}
-
-input:focus,
-select:focus {
-  border-color: #86efac;
-  background: #f0fdf4;
-  box-shadow: 0 0 0 3px rgba(134, 239, 172, 0.28);
-}
-
-.input-unit {
-  position: relative;
-}
-
-.input-unit input {
-  padding-left: 42px;
-}
-
-.input-unit span {
-  position: absolute;
-  left: 13px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7a857f;
-  font-size: 13px;
-  pointer-events: none;
-}
-
-.calculation-box {
-  background: #f0fdf4;
-  border: 1px solid #dcfce7;
-  border-radius: 12px;
-  padding: 15px;
-  margin: 5px 0 17px;
-}
-
-.calc-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-}
-
-.calc-row span {
-  color: #647067;
-  font-size: 12px;
-}
-
-.calc-row strong {
-  color: #15803d;
-  font-size: 13px;
-}
-
-.save-button {
-  width: 100%;
-  height: 48px;
-  border: none;
-  border-radius: 10px;
-  background: #15803d;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.save-button:hover {
-  background: #166534;
-  transform: translateY(-1px);
-}
-
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 17px 0;
-  border-bottom: 1px solid #edf1ee;
-}
-
-.summary-item span {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.summary-item small {
-  display: block;
-  margin-top: 4px;
-  color: #8a938d;
-  font-size: 10px;
-}
-
-.summary-item strong {
-  font-size: 15px;
-}
-
-.info-box {
-  margin-top: 20px;
-  padding: 15px;
-  border-radius: 12px;
-  background: #fafafa;
-}
-
-.info-box strong {
-  font-size: 12px;
-}
-
-.info-box p {
-  font-size: 11px;
-  line-height: 1.6;
-  color: #717b74;
-  margin: 7px 0 0;
-}
-
-.transaction-count {
-  background: #f1f5f2;
-  padding: 7px 11px;
-  border-radius: 20px;
-  color: #647067;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.transaction-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.transaction {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1.3fr 2fr 25px;
-  gap: 20px;
-  align-items: center;
-  padding: 18px 0;
-  border-top: 1px solid #edf1ee;
-}
-
-.transaction-main {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.gold-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: #f0fdf4;
-  color: #15803d;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  font-size: 12px;
-}
-
-.transaction-main strong {
-  display: block;
-  font-size: 13px;
-}
-
-.transaction-main span {
-  display: block;
-  margin-top: 3px;
-  font-size: 11px;
-  color: #68736c;
-}
-
-.transaction-main small {
-  display: block;
-  margin-top: 4px;
-  font-size: 10px;
-  color: #9aa39d;
-}
-
-.transaction-detail {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-}
-
-.transaction-detail span {
-  display: block;
-  font-size: 9px;
-  color: #929b95;
-  margin-bottom: 5px;
-}
-
-.transaction-detail strong {
-  font-size: 11px;
-}
-
-.delete-button {
-  border: none;
-  background: transparent;
-  color: #a1aaa4;
-  font-size: 21px;
-  cursor: pointer;
-}
-
-.delete-button:hover {
-  color: #dc2626;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 45px 20px;
-  border-top: 1px solid #edf1ee;
-}
-
-.empty-icon {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 12px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  background: #f0fdf4;
-  color: #16a34a;
-  font-size: 24px;
-}
-
-.empty-state h3 {
-  margin: 0;
-  font-size: 14px;
-}
-
-.empty-state p {
-  color: #89938c;
-  font-size: 11px;
-}
-
-footer {
-  text-align: center;
-  color: #9aa39d;
-  font-size: 10px;
-  padding-bottom: 30px;
-}
-
-@media (max-width: 850px) {
-  .stats-grid,
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .transaction {
-    grid-template-columns: 1fr;
-  }
-
-  .transaction-detail {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .delete-button {
-    position: absolute;
-    right: 0;
-    top: 20px;
-  }
-}
-
-@media (max-width: 550px) {
-  .topbar {
-    padding: 20px;
-  }
-
-  .container {
-    width: 92%;
-    margin-top: 20px;
-  }
-
-  .stats-grid {
-    gap: 12px;
-  }
-
-  .stat-value {
-    font-size: 28px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .transaction-detail {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-}
+import { useMemo, useState } from "react";
+import "./App.css";
+import { loadGoldData, saveGoldData } from "./storage";
+
+function App() {
+  const [transactions, setTransactions] = useState(loadGoldData);
+
+  const [form, setForm] = useState({
+    jenisLM: "Antam",
+    gramasi: "",
+    jumlah: 1,
+    hargaTotal: "",
+  });
+
+  const totalGram = useMemo(() => {
+    return transactions.reduce(
+      (total, item) => total + item.gramasi * item.jumlah,
+      0
+    );
+  }, [transactions]);
+
+  const totalModal = useMemo(() => {
+    return transactions.reduce(
+      (total, item) => total + item.hargaTotal,
+      0
+    );
+  }, [transactions]);
+
+  const hargaRataRata = totalGram > 0 ? totalModal / totalGram : 0;
+
+  const totalKeping = transactions.reduce(
+    (total, item) => total + item.jumlah,
+    0
+  );
+
+  const formatRupiah = (number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(number);
+  };
+
+  const formatNumber = (number) => {
+    return new Intl.NumberFormat("id-ID").format(number);
+  };
+
+  const hargaInput = Number(form.hargaTotal) || 0;
+  const gramasiInput = Number(form.gramasi) || 0;
+  const jumlahInput = Number(form.jumlah) || 0;
+
+  const totalGramInput = gramasiInput * jumlahInput;
+
+  const hargaPerGramInput =
+    totalGramInput > 0
+      ? hargaInput / totalGramInput
+      : 0;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (
+      !form.jenisLM ||
+      gramasiInput <= 0 ||
+      jumlahInput <= 0 ||
+      hargaInput <= 0
+    ) {
+      alert("Lengkapi semua data pembelian.");
+      return;
+    }
+
+    const newTransaction = {
+      id: Date.now(),
+      jenisLM: form.jenisLM,
+      gramasi: gramasiInput,
+      jumlah: jumlahInput,
+      hargaTotal: hargaInput,
+      tanggal: new Date().toISOString(),
+    };
+
+    const updatedTransactions = [
+      newTransaction,
+      ...transactions,
+    ];
+
+    setTransactions(updatedTransactions);
+    saveGoldData(updatedTransactions);
+
+    setForm({
+      jenisLM: "Antam",
+      gramasi: "",
+      jumlah: 1,
+      hargaTotal: "",
+    });
+
+    alert("Pembelian berhasil disimpan.");
+  };
+
+  const handleDelete = (id) => {
+    const confirmDelete = window.confirm(
+      "Hapus transaksi ini?"
+    );
+
+    if (!confirmDelete) return;
+
+    const updatedTransactions = transactions.filter(
+      (item) => item.id !== id
+    );
+
+    setTransactions(updatedTransactions);
+    saveGoldData(updatedTransactions);
+  };
+
+  const formatDate = (date) => {
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
+  return (
+    <div className="app">
+      <header className="topbar">
+        <div>
+          <div className="logo">
+            GOLD<span>SAVE</span>
+          </div>
+          <p className="subtitle">
+            Personal Gold Savings
+          </p>
+        </div>
+
+        <div className="header-badge">
+          {totalKeping} Keping
+        </div>
+      </header>
+
+      <main className="container">
+
+        {/* STATISTIC CARDS */}
+        <section className="stats-grid">
+
+          <div className="stat-card primary">
+            <div className="stat-label">
+              TOTAL EMAS
+            </div>
+
+            <div className="stat-value">
+              {formatNumber(totalGram)}
+              <span> gram</span>
+            </div>
+
+            <div className="stat-bottom">
+              {totalKeping} keping emas
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">
+              TOTAL MODAL
+            </div>
+
+            <div className="stat-value small">
+              {formatRupiah(totalModal)}
+            </div>
+
+            <div className="stat-bottom">
+              Total harga pembelian
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">
+              HARGA RATA-RATA
+            </div>
+
+            <div className="stat-value small">
+              {formatRupiah(hargaRataRata)}
+            </div>
+
+            <div className="stat-bottom">
+              Per gram
+            </div>
+          </div>
+
+        </section>
+
+        <section className="content-grid">
+
+          {/* FORM */}
+          <div className="card">
+
+            <div className="card-header">
+              <div>
+                <h2>Tambah Pembelian</h2>
+                <p>Catat pembelian logam mulia</p>
+              </div>
+
+              <div className="card-icon">
+                +
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+
+              <div className="form-group">
+                <label>Jenis LM</label>
+
+                <select
+                  name="jenisLM"
+                  value={form.jenisLM}
+                  onChange={handleChange}
+                >
+                  <option value="Antam">Antam</option>
+                  <option value="UBS">UBS</option>
+                  <option value="Galeri24">
+                    Galeri24
+                  </option>
+                  <option value="Lotus Archi">
+                    Lotus Archi
+                  </option>
+                  <option value="Lainnya">
+                    Lainnya
+                  </option>
+                </select>
+              </div>
+
+              <div className="form-row">
+
+                <div className="form-group">
+                  <label>Gramasi</label>
+
+                  <div className="input-unit">
+                    <input
+                      type="number"
+                      name="gramasi"
+                      value={form.gramasi}
+                      onChange={handleChange}
+                      placeholder="Contoh: 10"
+                      min="0"
+                      step="0.01"
+                    />
+
+                    <span>gram</span>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Jumlah Barang</label>
+
+                  <input
+                    type="number"
+                    name="jumlah"
+                    value={form.jumlah}
+                    onChange={handleChange}
+                    min="1"
+                  />
+                </div>
+
+              </div>
+
+              <div className="form-group">
+                <label>Harga Pembelian</label>
+
+                <div className="input-unit">
+                  <span>Rp</span>
+
+                  <input
+                    type="number"
+                    name="hargaTotal"
+                    value={form.hargaTotal}
+                    onChange={handleChange}
+                    placeholder="Contoh: 15000000"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              {/* PREVIEW */}
+              <div className="calculation-box">
+
+                <div className="calc-row">
+                  <span>Total gram</span>
+
+                  <strong>
+                    {formatNumber(totalGramInput)} gram
+                  </strong>
+                </div>
+
+                <div className="calc-row">
+                  <span>Harga per gram</span>
+
+                  <strong>
+                    {formatRupiah(hargaPerGramInput)}
+                  </strong>
+                </div>
+
+              </div>
+
+              <button
+                type="submit"
+                className="save-button"
+              >
+                Simpan Pembelian
+              </button>
+
+            </form>
+          </div>
+
+          {/* SUMMARY */}
+          <div className="card summary-card">
+
+            <div className="card-header">
+              <div>
+                <h2>Ringkasan</h2>
+                <p>Posisi tabungan emas</p>
+              </div>
+            </div>
+
+            <div className="summary-item">
+              <div>
+                <span>Total Kepemilikan</span>
+                <small>Seluruh LM</small>
+              </div>
+
+              <strong>
+                {formatNumber(totalGram)} g
+              </strong>
+            </div>
+
+            <div className="summary-item">
+              <div>
+                <span>Total Modal</span>
+                <small>Harga beli seluruh LM</small>
+              </div>
+
+              <strong>
+                {formatRupiah(totalModal)}
+              </strong>
+            </div>
+
+            <div className="summary-item">
+              <div>
+                <span>Harga Rata-rata</span>
+                <small>Modal ÷ total gram</small>
+              </div>
+
+              <strong>
+                {formatRupiah(hargaRataRata)}
+              </strong>
+            </div>
+
+            <div className="info-box">
+              <strong>💡 Cara perhitungan</strong>
+
+              <p>
+                Harga rata-rata dihitung dari total
+                modal dibagi total gram emas yang
+                dimiliki.
+              </p>
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* HISTORY */}
+        <section className="card history-card">
+
+          <div className="card-header">
+            <div>
+              <h2>Riwayat Pembelian</h2>
+              <p>Daftar transaksi emas</p>
+            </div>
+
+            <span className="transaction-count">
+              {transactions.length} transaksi
+            </span>
+          </div>
+
+          {transactions.length === 0 ? (
+
+            <div className="empty-state">
+              <div className="empty-icon">
+                ◇
+              </div>
+
+              <h3>Belum ada pembelian</h3>
+
+              <p>
+                Tambahkan pembelian emas pertama
+                menggunakan form di atas.
+              </p>
+            </div>
+
+          ) : (
+
+            <div className="transaction-list">
+
+              {transactions.map((item) => {
+
+                const totalGramItem =
+                  item.gramasi * item.jumlah;
+
+                const hargaPerGram =
+                  item.hargaTotal / totalGramItem;
+
+                return (
+                  <div
+                    className="transaction"
+                    key={item.id}
+                  >
+
+                    <div className="transaction-main">
+
+                      <div className="gold-icon">
+                        Au
+                      </div>
+
+                      <div>
+                        <strong>
+                          {item.jenisLM}
+                        </strong>
+
+                        <span>
+                          {item.gramasi} gram ×{" "}
+                          {item.jumlah} keping
+                        </span>
+
+                        <small>
+                          {formatDate(item.tanggal)}
+                        </small>
+                      </div>
+
+                    </div>
+
+                    <div className="transaction-detail">
+
+                      <div>
+                        <span>Total Gram</span>
+                        <strong>
+                          {formatNumber(
+                            totalGramItem
+                          )} g
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Harga / Gram</span>
+                        <strong>
+                          {formatRupiah(
+                            hargaPerGram
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Total Harga</span>
+                        <strong>
+                          {formatRupiah(
+                            item.hargaTotal
+                          )}
+                        </strong>
+                      </div>
+
+                    </div>
+
+                    <button
+                      className="delete-button"
+                      onClick={() =>
+                        handleDelete(item.id)
+                      }
+                      title="Hapus transaksi"
+                    >
+                      ×
+                    </button>
+
+                  </div>
+                );
+              })}
+
+            </div>
+          )}
+
+        </section>
+
+      </main>
+
+      <footer>
+        GOLD SAVE • Personal Gold Savings
+      </footer>
+
+    </div>
+  );
+}
+
+export default App;
