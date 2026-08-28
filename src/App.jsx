@@ -18,9 +18,7 @@ function loadBrands() {
   try {
     const data = localStorage.getItem(BRAND_STORAGE_KEY);
 
-    if (!data) {
-      return DEFAULT_BRANDS;
-    }
+    if (!data) return DEFAULT_BRANDS;
 
     const customBrands = JSON.parse(data);
 
@@ -51,9 +49,9 @@ function App() {
 
   const [page, setPage] =
     useState("dashboard");
-  
+
   const [editingId, setEditingId] =
-  useState(null);
+    useState(null);
 
   const [theme, setTheme] =
     useState("emerald");
@@ -71,12 +69,12 @@ function App() {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
-    }).format(number);
+    }).format(Number(number) || 0);
 
   const formatNumber = (number) =>
     new Intl.NumberFormat("id-ID", {
       maximumFractionDigits: 2,
-    }).format(number);
+    }).format(Number(number) || 0);
 
   const formatPriceInput = (value) => {
     if (!value) return "";
@@ -88,6 +86,16 @@ function App() {
     if (!number) return "";
 
     return new Intl.NumberFormat("id-ID").format(number);
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "-";
+
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(date));
   };
 
   const totalGram = useMemo(
@@ -137,11 +145,63 @@ function App() {
         totalGramInput
       : 0;
 
+  const brandSummary = useMemo(
+    () =>
+      brands
+        .map((brand) => {
+          const brandTransactions =
+            transactions.filter(
+              (item) => item.jenisLM === brand
+            );
+
+          const gram =
+            brandTransactions.reduce(
+              (total, item) =>
+                total +
+                Number(item.gramasi) *
+                  Number(item.jumlah),
+              0
+            );
+
+          const keping =
+            brandTransactions.reduce(
+              (total, item) =>
+                total + Number(item.jumlah),
+              0
+            );
+
+          const modal =
+            brandTransactions.reduce(
+              (total, item) =>
+                total + Number(item.hargaTotal),
+              0
+            );
+
+          const rataRata =
+            gram > 0 ? modal / gram : 0;
+
+          return {
+            brand,
+            gram,
+            keping,
+            modal,
+            rataRata,
+            percentage:
+              totalGram > 0
+                ? (gram / totalGram) * 100
+                : 0,
+          };
+        })
+        .filter((item) => item.gram > 0),
+    [brands, transactions, totalGram]
+  );
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "hargaTotal") {
-      const cleanValue = value.replace(/\D/g, "");
+      const cleanValue =
+        value.replace(/\D/g, "");
 
       setForm((prev) => ({
         ...prev,
@@ -157,131 +217,199 @@ function App() {
     }));
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const jenisLM =
-    form.jenisLM === "Lainnya"
-      ? form.customJenisLM.trim()
-      : form.jenisLM;
+    const jenisLM =
+      form.jenisLM === "Lainnya"
+        ? form.customJenisLM.trim()
+        : form.jenisLM;
 
-  const gramasi = Number(form.gramasi);
-  const jumlah = Number(form.jumlah);
-  const hargaTotal = Number(form.hargaTotal);
+    const gramasi = Number(form.gramasi);
+    const jumlah = Number(form.jumlah);
+    const hargaTotal = Number(form.hargaTotal);
 
-  if (!jenisLM) {
-    alert("Masukkan nama logam mulia.");
-    return;
-  }
+    if (!jenisLM) {
+      alert("Masukkan nama logam mulia.");
+      return;
+    }
 
-  if (
-    gramasi <= 0 ||
-    jumlah <= 0 ||
-    hargaTotal <= 0
-  ) {
-    alert("Lengkapi semua data pembelian.");
-    return;
-  }
+    if (
+      gramasi <= 0 ||
+      jumlah <= 0 ||
+      hargaTotal <= 0
+    ) {
+      alert("Lengkapi semua data pembelian.");
+      return;
+    }
 
+    let updatedTransactions;
 
-  let updatedTransactions;
-
-
-  // =========================
-  // MODE EDIT
-  // =========================
-
-  if (editingId !== null) {
-
-    updatedTransactions =
-      transactions.map((item) => {
-
-        if (item.id !== editingId) {
-          return item;
-        }
-
-        return {
-          ...item,
-          jenisLM,
-          gramasi,
-          jumlah,
-          hargaTotal,
-        };
-
-      });
-
-  }
-
-
-  // =========================
-  // MODE TAMBAH
-  // =========================
-
-  else {
-
-    const newTransaction = {
-      id: Date.now(),
-      jenisLM,
-      gramasi,
-      jumlah,
-      hargaTotal,
-      tanggal:
-        new Date().toISOString(),
-    };
-
-    updatedTransactions = [
-      newTransaction,
-      ...transactions,
-    ];
-
-  }
-
-
-  setTransactions(updatedTransactions);
-
-  saveGoldData(updatedTransactions);
-
-
-          // Simpan LM baru
-          if (
-            form.jenisLM === "Lainnya" &&
-            !brands.includes(jenisLM)
-          ) {
-            const updatedBrands = [
-              ...brands,
-              jenisLM,
-            ];
-          
-            setBrands(updatedBrands);
-            saveBrands(updatedBrands);
+    if (editingId !== null) {
+      updatedTransactions =
+        transactions.map((item) => {
+          if (item.id !== editingId) {
+            return item;
           }
-          
-          setForm({
+
+          return {
+            ...item,
             jenisLM,
-            customJenisLM: "",
-            gramasi: "",
-            jumlah: 1,
-            hargaTotal: "",
-          });
-          
-          setEditingId(null);
-          
-          setPage("history");
-          };   // ← AKHIR handleSubmit
-          
-          
-          // setelah itu baru JSX menu
-          
+            gramasi,
+            jumlah,
+            hargaTotal,
+          };
+        });
+    } else {
+      const newTransaction = {
+        id: Date.now(),
+        jenisLM,
+        gramasi,
+        jumlah,
+        hargaTotal,
+        tanggal:
+          new Date().toISOString(),
+      };
+
+      updatedTransactions = [
+        newTransaction,
+        ...transactions,
+      ];
+    }
+
+    setTransactions(updatedTransactions);
+    saveGoldData(updatedTransactions);
+
+    if (
+      form.jenisLM === "Lainnya" &&
+      !brands.includes(jenisLM)
+    ) {
+      const updatedBrands = [
+        ...brands,
+        jenisLM,
+      ];
+
+      setBrands(updatedBrands);
+      saveBrands(updatedBrands);
+    }
+
+    setForm({
+      jenisLM: brands.includes(jenisLM)
+        ? jenisLM
+        : "Antam",
+      customJenisLM: "",
+      gramasi: "",
+      jumlah: 1,
+      hargaTotal: "",
+    });
+
+    setEditingId(null);
+    setPage("history");
+  };
+
+  const handleDelete = (id) => {
+    const confirmed = window.confirm(
+      "Hapus transaksi ini?"
+    );
+
+    if (!confirmed) return;
+
+    const updatedTransactions =
+      transactions.filter(
+        (item) => item.id !== id
+      );
+
+    setTransactions(updatedTransactions);
+    saveGoldData(updatedTransactions);
+  };
+
+  const handleEdit = (transaction) => {
+    const isDefaultBrand =
+      brands.includes(transaction.jenisLM);
+
+    setEditingId(transaction.id);
+
+    setForm({
+      jenisLM: isDefaultBrand
+        ? transaction.jenisLM
+        : "Lainnya",
+      customJenisLM: isDefaultBrand
+        ? ""
+        : transaction.jenisLM,
+      gramasi: String(transaction.gramasi),
+      jumlah: Number(transaction.jumlah),
+      hargaTotal: String(transaction.hargaTotal),
+    });
+
+    setPage("purchase");
+  };
+
+  return (
+    <div
+      className={`app theme-${theme}`}
+    >
+      <header className="topbar">
+
+        <div className="brand">
+          <div className="logo">
+            GOLD<span>SAVE</span>
+          </div>
+
+          <p className="subtitle">
+            Personal Gold Savings
+          </p>
+        </div>
+
+        <nav className="nav-menu">
+
+          <button
+            className={
+              page === "dashboard"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() =>
+              setPage("dashboard")
+            }
+          >
+            Dashboard
+          </button>
+
+          <button
+            className={
+              page === "purchase"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() => {
+              setEditingId(null);
+              setForm({
+                jenisLM: "Antam",
+                customJenisLM: "",
+                gramasi: "",
+                jumlah: 1,
+                hargaTotal: "",
+              });
+              setPage("purchase");
+            }}
+          >
+            Pembelian
+          </button>
+
           <button
             className={
               page === "history"
                 ? "nav-button active"
                 : "nav-button"
             }
-            onClick={() => setPage("history")}
+            onClick={() =>
+              setPage("history")
+            }
           >
             Riwayat
           </button>
+
+        </nav>
 
         <div className="nav-actions">
 
@@ -313,11 +441,10 @@ const handleSubmit = (e) => {
 
       </header>
 
+      <main className="main-container">
 
-          <main className="main-container">
-      
         {page === "dashboard" ? (
-      
+
           <Dashboard
             totalGram={totalGram}
             totalModal={totalModal}
@@ -331,12 +458,19 @@ const handleSubmit = (e) => {
             handleDelete={handleDelete}
             onAddPurchase={() => {
               setEditingId(null);
+              setForm({
+                jenisLM: "Antam",
+                customJenisLM: "",
+                gramasi: "",
+                jumlah: 1,
+                hargaTotal: "",
+              });
               setPage("purchase");
             }}
           />
-      
+
         ) : page === "purchase" ? (
-      
+
           <Purchase
             form={form}
             brands={brands}
@@ -357,9 +491,9 @@ const handleSubmit = (e) => {
             }}
             editingId={editingId}
           />
-      
+
         ) : (
-      
+
           <TransactionHistory
             transactions={transactions}
             formatRupiah={formatRupiah}
@@ -369,12 +503,19 @@ const handleSubmit = (e) => {
             handleDelete={handleDelete}
             onAddPurchase={() => {
               setEditingId(null);
+              setForm({
+                jenisLM: "Antam",
+                customJenisLM: "",
+                gramasi: "",
+                jumlah: 1,
+                hargaTotal: "",
+              });
               setPage("purchase");
             }}
           />
-      
+
         )}
-      
+
       </main>
 
       <footer>
@@ -384,7 +525,6 @@ const handleSubmit = (e) => {
     </div>
   );
 }
-
 
 /* =========================
    DASHBOARD
@@ -431,7 +571,6 @@ function Dashboard({
 
       </section>
 
-
       <section className="dashboard-stats">
 
         <div className="big-stat">
@@ -449,7 +588,6 @@ function Dashboard({
 
         </div>
 
-
         <div className="stat-card">
 
           <span>Total Modal</span>
@@ -463,7 +601,6 @@ function Dashboard({
           </p>
 
         </div>
-
 
         <div className="stat-card">
 
@@ -481,131 +618,124 @@ function Dashboard({
 
       </section>
 
-
       <section className="dashboard-grid">
 
-    <div className="panel portfolio-panel">
+        <div className="panel portfolio-panel">
 
-  <div className="panel-header">
+          <div className="panel-header">
 
-    <div>
-      <h2>Portofolio LM</h2>
+            <div>
+              <h2>Portofolio LM</h2>
 
-      <p>
-        Kepemilikan berdasarkan jenis logam
-      </p>
-    </div>
-
-    <span className="count-badge">
-      {brandSummary.length} LM
-    </span>
-
-  </div>
-
-
-  {brandSummary.length === 0 ? (
-
-    <div className="empty-small">
-      Belum ada data emas.
-    </div>
-
-  ) : (
-
-    <div className="portfolio-list">
-
-      {brandSummary.map((item) => (
-
-        <div
-          className="portfolio-card"
-          key={item.brand}
-        >
-
-          <div className="portfolio-top">
-
-            <div className="portfolio-brand">
-
-              <div className="portfolio-icon">
-                Au
-              </div>
-
-              <div>
-                <strong>
-                  {item.brand}
-                </strong>
-
-                <span>
-                  {item.keping} keping
-                </span>
-              </div>
-
+              <p>
+                Kepemilikan berdasarkan jenis logam
+              </p>
             </div>
 
-            <div className="portfolio-percent">
-              {item.percentage.toFixed(1)}%
-            </div>
-
-          </div>
-
-
-          <div className="portfolio-gram">
-
-            <strong>
-              {formatNumber(item.gram)}
-            </strong>
-
-            <span>
-              gram
+            <span className="count-badge">
+              {brandSummary.length} LM
             </span>
 
           </div>
 
+          {brandSummary.length === 0 ? (
 
-          <div className="portfolio-details">
-
-            <div>
-              <span>Modal</span>
-
-              <strong>
-                {formatRupiah(item.modal)}
-              </strong>
+            <div className="empty-small">
+              Belum ada data emas.
             </div>
 
+          ) : (
 
-            <div>
-              <span>Rata-rata</span>
+            <div className="portfolio-list">
 
-              <strong>
-                {formatRupiah(
-                  item.rataRata
-                )}
-                <small>/g</small>
-              </strong>
+              {brandSummary.map((item) => (
+
+                <div
+                  className="portfolio-card"
+                  key={item.brand}
+                >
+
+                  <div className="portfolio-top">
+
+                    <div className="portfolio-brand">
+
+                      <div className="portfolio-icon">
+                        Au
+                      </div>
+
+                      <div>
+                        <strong>
+                          {item.brand}
+                        </strong>
+
+                        <span>
+                          {item.keping} keping
+                        </span>
+                      </div>
+
+                    </div>
+
+                    <div className="portfolio-percent">
+                      {item.percentage.toFixed(1)}%
+                    </div>
+
+                  </div>
+
+                  <div className="portfolio-gram">
+
+                    <strong>
+                      {formatNumber(item.gram)}
+                    </strong>
+
+                    <span>
+                      gram
+                    </span>
+
+                  </div>
+
+                  <div className="portfolio-details">
+
+                    <div>
+                      <span>Modal</span>
+
+                      <strong>
+                        {formatRupiah(item.modal)}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Rata-rata</span>
+
+                      <strong>
+                        {formatRupiah(
+                          item.rataRata
+                        )}
+                        <small>/g</small>
+                      </strong>
+                    </div>
+
+                  </div>
+
+                  <div className="portfolio-progress">
+
+                    <div
+                      style={{
+                        width:
+                          `${item.percentage}%`,
+                      }}
+                    />
+
+                  </div>
+
+                </div>
+
+              ))}
+
             </div>
 
-          </div>
-
-
-          <div className="portfolio-progress">
-
-            <div
-              style={{
-                width:
-                  `${item.percentage}%`,
-              }}
-            />
-
-          </div>
+          )}
 
         </div>
-
-      ))}
-
-    </div>
-
-  )}
-
-</div>
-
 
         <div className="panel">
 
@@ -624,7 +754,6 @@ function Dashboard({
             </span>
 
           </div>
-
 
           {transactions.length === 0 ? (
 
@@ -714,7 +843,6 @@ function Dashboard({
   );
 }
 
-
 /* =========================
    PURCHASE
 ========================= */
@@ -742,30 +870,25 @@ function Purchase({
         ← Kembali ke Dashboard
       </button>
 
-
       <div className="purchase-heading">
 
         <p className="eyebrow">
           TRANSAKSI
         </p>
 
-                <h1>
+        <h1>
           {editingId !== null
             ? "Edit Transaksi"
             : "Tambah Pembelian"}
         </h1>
-        
+
         <p>
           {editingId !== null
             ? "Perbarui data pembelian logam mulia."
             : "Catat pembelian logam mulia kamu."}
         </p>
-        <p>
-          Catat pembelian logam mulia kamu.
-        </p>
 
       </div>
-
 
       <div className="purchase-layout">
 
@@ -804,7 +927,6 @@ function Purchase({
 
             </div>
 
-
             {form.jenisLM === "Lainnya" && (
 
               <div className="form-group">
@@ -831,7 +953,6 @@ function Purchase({
               </div>
 
             )}
-
 
             <div className="form-row">
 
@@ -861,7 +982,6 @@ function Purchase({
 
               </div>
 
-
               <div className="form-group">
 
                 <label>
@@ -880,7 +1000,6 @@ function Purchase({
               </div>
 
             </div>
-
 
             <div className="form-group">
 
@@ -914,7 +1033,6 @@ function Purchase({
 
             </div>
 
-
             <div className="calculation-box">
 
               <div>
@@ -932,7 +1050,6 @@ function Purchase({
 
               </div>
 
-
               <div>
 
                 <span>
@@ -949,20 +1066,18 @@ function Purchase({
 
             </div>
 
-
             <button
               type="submit"
               className="save-button"
             >
               {editingId !== null
-              ? "Simpan Perubahan"
-              : "Simpan Pembelian"}
+                ? "Simpan Perubahan"
+                : "Simpan Pembelian"}
             </button>
 
           </form>
 
         </div>
-
 
         <aside className="purchase-info">
 
@@ -1001,6 +1116,11 @@ function Purchase({
     </section>
   );
 }
+
+/* =========================
+   TRANSACTION HISTORY
+========================= */
+
 function TransactionHistory({
   transactions,
   formatRupiah,
@@ -1010,9 +1130,6 @@ function TransactionHistory({
   handleDelete,
   onAddPurchase,
 }) {
-  const totalTransactions =
-    transactions.length;
-
   return (
     <section className="history-page">
 
@@ -1041,7 +1158,6 @@ function TransactionHistory({
 
       </div>
 
-
       <div className="history-card">
 
         <div className="history-card-header">
@@ -1052,16 +1168,15 @@ function TransactionHistory({
             </h2>
 
             <p>
-              {totalTransactions} transaksi tercatat
+              {transactions.length} transaksi tercatat
             </p>
           </div>
 
           <span className="count-badge">
-            {totalTransactions}
+            {transactions.length}
           </span>
 
         </div>
-
 
         {transactions.length === 0 ? (
 
@@ -1139,7 +1254,6 @@ function TransactionHistory({
 
                   </div>
 
-
                   <div className="history-detail">
 
                     <div>
@@ -1150,7 +1264,6 @@ function TransactionHistory({
                       </strong>
                     </div>
 
-
                     <div>
                       <span>Harga Pembelian</span>
 
@@ -1160,7 +1273,6 @@ function TransactionHistory({
                         )}
                       </strong>
                     </div>
-
 
                     <div>
                       <span>Harga / Gram</span>
@@ -1174,10 +1286,10 @@ function TransactionHistory({
 
                   </div>
 
-
                   <div className="history-actions">
 
                     <button
+                      type="button"
                       className="edit-button"
                       onClick={() =>
                         handleEdit(item)
@@ -1187,6 +1299,7 @@ function TransactionHistory({
                     </button>
 
                     <button
+                      type="button"
                       className="delete-button"
                       onClick={() =>
                         handleDelete(item.id)
@@ -1200,7 +1313,6 @@ function TransactionHistory({
                 </div>
 
               );
-
             })}
 
           </div>
