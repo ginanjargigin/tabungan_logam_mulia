@@ -412,31 +412,9 @@ function App() {
         </nav>
 
         <div className="nav-actions">
-
-          <select
-            className="theme-select"
-            value={theme}
-            onChange={(e) =>
-              setTheme(e.target.value)
-            }
-          >
-            <option value="emerald">
-              Emerald
-            </option>
-
-            <option value="dark-gold">
-              Dark Gold
-            </option>
-
-            <option value="midnight">
-              Midnight
-            </option>
-          </select>
-
           <div className="coin-count">
             {totalKeping} Keping
           </div>
-
         </div>
 
       </header>
@@ -617,6 +595,27 @@ function Dashboard({
         </div>
 
       </section>
+
+      <div className="dashboard-toolbar">
+        <div className="theme-control">
+          <label htmlFor="dashboard-theme">
+            Tema
+          </label>
+
+          <select
+            id="dashboard-theme"
+            value={theme}
+            onChange={(e) =>
+              setTheme(e.target.value)
+            }
+            aria-label="Pilih tema dashboard"
+          >
+            <option value="emerald">Emerald</option>
+            <option value="dark-gold">Dark Gold</option>
+            <option value="midnight">Midnight</option>
+          </select>
+        </div>
+      </div>
 
       <section className="dashboard-grid">
 
