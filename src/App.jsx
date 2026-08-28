@@ -513,6 +513,8 @@ function Dashboard({
   totalModal,
   hargaRataRata,
   totalKeping,
+  theme,
+  setTheme,
   transactions,
   brandSummary,
   formatRupiah,
