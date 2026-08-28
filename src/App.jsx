@@ -51,6 +51,9 @@ function App() {
 
   const [page, setPage] =
     useState("dashboard");
+  
+  const [editingId, setEditingId] =
+  useState(null);
 
   const [theme, setTheme] =
     useState("emerald");
@@ -154,31 +157,67 @@ function App() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-    const jenisLM =
-      form.jenisLM === "Lainnya"
-        ? form.customJenisLM.trim()
-        : form.jenisLM;
+  const jenisLM =
+    form.jenisLM === "Lainnya"
+      ? form.customJenisLM.trim()
+      : form.jenisLM;
 
-    const gramasi = Number(form.gramasi);
-    const jumlah = Number(form.jumlah);
-    const hargaTotal = Number(form.hargaTotal);
+  const gramasi = Number(form.gramasi);
+  const jumlah = Number(form.jumlah);
+  const hargaTotal = Number(form.hargaTotal);
 
-    if (!jenisLM) {
-      alert("Masukkan nama logam mulia.");
-      return;
-    }
+  if (!jenisLM) {
+    alert("Masukkan nama logam mulia.");
+    return;
+  }
 
-    if (
-      gramasi <= 0 ||
-      jumlah <= 0 ||
-      hargaTotal <= 0
-    ) {
-      alert("Lengkapi semua data pembelian.");
-      return;
-    }
+  if (
+    gramasi <= 0 ||
+    jumlah <= 0 ||
+    hargaTotal <= 0
+  ) {
+    alert("Lengkapi semua data pembelian.");
+    return;
+  }
+
+
+  let updatedTransactions;
+
+
+  // =========================
+  // MODE EDIT
+  // =========================
+
+  if (editingId !== null) {
+
+    updatedTransactions =
+      transactions.map((item) => {
+
+        if (item.id !== editingId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          jenisLM,
+          gramasi,
+          jumlah,
+          hargaTotal,
+        };
+
+      });
+
+  }
+
+
+  // =========================
+  // MODE TAMBAH
+  // =========================
+
+  else {
 
     const newTransaction = {
       id: Date.now(),
@@ -186,158 +225,56 @@ function App() {
       gramasi,
       jumlah,
       hargaTotal,
-      tanggal: new Date().toISOString(),
+      tanggal:
+        new Date().toISOString(),
     };
 
-    const updatedTransactions = [
+    updatedTransactions = [
       newTransaction,
       ...transactions,
     ];
 
-    setTransactions(updatedTransactions);
-    saveGoldData(updatedTransactions);
+  }
 
-    // Simpan jenis LM baru
-    if (
-      form.jenisLM === "Lainnya" &&
-      !brands.includes(jenisLM)
-    ) {
-      const updatedBrands = [
-        ...brands,
-        jenisLM,
-      ];
 
-      setBrands(updatedBrands);
-      saveBrands(updatedBrands);
-    }
+  setTransactions(updatedTransactions);
 
-    setForm({
+  saveGoldData(updatedTransactions);
+
+
+  // Simpan LM baru
+  if (
+    form.jenisLM === "Lainnya" &&
+    !brands.includes(jenisLM)
+  ) {
+
+    const updatedBrands = [
+      ...brands,
       jenisLM,
-      customJenisLM: "",
-      gramasi: "",
-      jumlah: 1,
-      hargaTotal: "",
-    });
+    ];
 
-    setPage("dashboard");
-  };
+    setBrands(updatedBrands);
+    saveBrands(updatedBrands);
 
-  const handleDelete = (id) => {
-    if (!window.confirm("Hapus transaksi ini?")) {
-      return;
-    }
+  }
 
-    const updatedTransactions =
-      transactions.filter(
-        (item) => item.id !== id
-      );
 
-    setTransactions(updatedTransactions);
-    saveGoldData(updatedTransactions);
-  };
+  setForm({
+    jenisLM,
+    customJenisLM: "",
+    gramasi: "",
+    jumlah: 1,
+    hargaTotal: "",
+  });
 
-  const formatDate = (date) =>
-    new Intl.DateTimeFormat("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(date));
+  setEditingId(null);
 
- const brandSummary = brands
-  .map((brand) => {
-    const brandTransactions =
-      transactions.filter(
-        (item) => item.jenisLM === brand
-      );
-
-    const gram = brandTransactions.reduce(
-      (total, item) =>
-        total +
-        Number(item.gramasi) *
-          Number(item.jumlah),
-      0
-    );
-
-    const keping = brandTransactions.reduce(
-      (total, item) =>
-        total + Number(item.jumlah),
-      0
-    );
-
-    const modal = brandTransactions.reduce(
-      (total, item) =>
-        total + Number(item.hargaTotal),
-      0
-    );
-
-    const rataRata =
-      gram > 0
-        ? modal / gram
-        : 0;
-
-    return {
-      brand,
-      gram,
-      keping,
-      modal,
-      rataRata,
-      percentage:
-        totalGram > 0
-          ? (gram / totalGram) * 100
-          : 0,
-    };
-  })
-  .filter((item) => item.gram > 0);
-
-  return (
-    <div className={`app theme-${theme}`}>
-
-      <header className="navbar">
-
-        <div className="brand">
-          <div className="brand-mark">
-            Au
-          </div>
-
-          <div>
-            <div className="logo">
-              GOLD<span>SAVE</span>
-            </div>
-
-            <div className="logo-subtitle">
-              Personal Gold Savings
-            </div>
-          </div>
-        </div>
-
-        <nav className="nav-menu">
-
-          <button
-            className={
-              page === "dashboard"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() =>
-              setPage("dashboard")
-            }
+  setPage("history");
+};
           >
-            Dashboard
+            Riwayat
           </button>
-
-          <button
-            className={
-              page === "purchase"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() =>
-              setPage("purchase")
-            }
-          >
-            Pembelian
-          </button>
-
+        
         </nav>
 
         <div className="nav-actions">
@@ -371,10 +308,10 @@ function App() {
       </header>
 
 
-      <main className="main-container">
-
+          <main className="main-container">
+      
         {page === "dashboard" ? (
-
+      
           <Dashboard
             totalGram={totalGram}
             totalModal={totalModal}
@@ -386,13 +323,14 @@ function App() {
             formatNumber={formatNumber}
             formatDate={formatDate}
             handleDelete={handleDelete}
-            onAddPurchase={() =>
-              setPage("purchase")
-            }
+            onAddPurchase={() => {
+              setEditingId(null);
+              setPage("purchase");
+            }}
           />
-
-        ) : (
-
+      
+        ) : page === "purchase" ? (
+      
           <Purchase
             form={form}
             brands={brands}
@@ -407,13 +345,30 @@ function App() {
             formatPriceInput={
               formatPriceInput
             }
-            onBack={() =>
-              setPage("dashboard")
-            }
+            onBack={() => {
+              setEditingId(null);
+              setPage("dashboard");
+            }}
+            editingId={editingId}
           />
-
+      
+        ) : (
+      
+          <TransactionHistory
+            transactions={transactions}
+            formatRupiah={formatRupiah}
+            formatNumber={formatNumber}
+            formatDate={formatDate}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            onAddPurchase={() => {
+              setEditingId(null);
+              setPage("purchase");
+            }}
+          />
+      
         )}
-
+      
       </main>
 
       <footer>
@@ -769,6 +724,7 @@ function Purchase({
   formatNumber,
   formatPriceInput,
   onBack,
+  editingId,
 }) {
   return (
     <section className="purchase-page">
@@ -787,10 +743,17 @@ function Purchase({
           TRANSAKSI
         </p>
 
-        <h1>
-          Tambah Pembelian
+                <h1>
+          {editingId !== null
+            ? "Edit Transaksi"
+            : "Tambah Pembelian"}
         </h1>
-
+        
+        <p>
+          {editingId !== null
+            ? "Perbarui data pembelian logam mulia."
+            : "Catat pembelian logam mulia kamu."}
+        </p>
         <p>
           Catat pembelian logam mulia kamu.
         </p>
@@ -985,7 +948,9 @@ function Purchase({
               type="submit"
               className="save-button"
             >
-              Simpan Pembelian
+              {editingId !== null
+              ? "Simpan Perubahan"
+              : "Simpan Pembelian"}
             </button>
 
           </form>
@@ -1024,6 +989,217 @@ function Purchase({
           </div>
 
         </aside>
+
+      </div>
+
+    </section>
+  );
+}
+function TransactionHistory({
+  transactions,
+  formatRupiah,
+  formatNumber,
+  formatDate,
+  handleEdit,
+  handleDelete,
+  onAddPurchase,
+}) {
+  const totalTransactions =
+    transactions.length;
+
+  return (
+    <section className="history-page">
+
+      <div className="history-heading">
+
+        <div>
+          <p className="eyebrow">
+            DATA TRANSAKSI
+          </p>
+
+          <h1>
+            Riwayat Transaksi
+          </h1>
+
+          <p>
+            Semua pembelian logam mulia kamu.
+          </p>
+        </div>
+
+        <button
+          className="primary-button"
+          onClick={onAddPurchase}
+        >
+          + Tambah Pembelian
+        </button>
+
+      </div>
+
+
+      <div className="history-card">
+
+        <div className="history-card-header">
+
+          <div>
+            <h2>
+              Semua Pembelian
+            </h2>
+
+            <p>
+              {totalTransactions} transaksi tercatat
+            </p>
+          </div>
+
+          <span className="count-badge">
+            {totalTransactions}
+          </span>
+
+        </div>
+
+
+        {transactions.length === 0 ? (
+
+          <div className="history-empty">
+
+            <div className="history-empty-icon">
+              Au
+            </div>
+
+            <h3>
+              Belum ada transaksi
+            </h3>
+
+            <p>
+              Tambahkan pembelian emas
+              pertama kamu.
+            </p>
+
+            <button
+              className="primary-button"
+              onClick={onAddPurchase}
+            >
+              Tambah Pembelian
+            </button>
+
+          </div>
+
+        ) : (
+
+          <div className="history-list">
+
+            {transactions.map((item) => {
+
+              const gram =
+                Number(item.gramasi) *
+                Number(item.jumlah);
+
+              const hargaPerGram =
+                gram > 0
+                  ? Number(item.hargaTotal) /
+                    gram
+                  : 0;
+
+              return (
+
+                <div
+                  className="history-item"
+                  key={item.id}
+                >
+
+                  <div className="history-main">
+
+                    <div className="gold-circle">
+                      Au
+                    </div>
+
+                    <div>
+
+                      <strong>
+                        {item.jenisLM}
+                      </strong>
+
+                      <span>
+                        {item.gramasi} gram ×{" "}
+                        {item.jumlah} keping
+                      </span>
+
+                      <small>
+                        {formatDate(
+                          item.tanggal
+                        )}
+                      </small>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="history-detail">
+
+                    <div>
+                      <span>Total Gram</span>
+
+                      <strong>
+                        {formatNumber(gram)} gram
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>Harga Pembelian</span>
+
+                      <strong>
+                        {formatRupiah(
+                          item.hargaTotal
+                        )}
+                      </strong>
+                    </div>
+
+
+                    <div>
+                      <span>Harga / Gram</span>
+
+                      <strong>
+                        {formatRupiah(
+                          hargaPerGram
+                        )}
+                      </strong>
+                    </div>
+
+                  </div>
+
+
+                  <div className="history-actions">
+
+                    <button
+                      className="edit-button"
+                      onClick={() =>
+                        handleEdit(item)
+                      }
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="delete-button"
+                      onClick={() =>
+                        handleDelete(item.id)
+                      }
+                    >
+                      Hapus
+                    </button>
+
+                  </div>
+
+                </div>
+
+              );
+
+            })}
+
+          </div>
+
+        )}
 
       </div>
 
