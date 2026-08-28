@@ -1227,6 +1227,10 @@ function TransactionHistory({
 
                     <div>
 
+                      <small className="history-brand-label">
+                        Merk LM
+                      </small>
+
                       <strong>
                         {item.jenisLM}
                       </strong>
