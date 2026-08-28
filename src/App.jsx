@@ -382,6 +382,7 @@ function App() {
               hargaPerGramInput
             }
             formatRupiah={formatRupiah}
+            formatNumber={formatNumber}
             formatPriceInput={
               formatPriceInput
             }
