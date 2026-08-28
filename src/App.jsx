@@ -2,8 +2,20 @@ import React, { useMemo, useState } from "react";
 import "./App.css";
 import { loadGoldData, saveGoldData } from "./storage";
 
+const BRANDS = [
+  "Antam",
+  "UBS",
+  "Hartadinata",
+  "Lotus Archi",
+  "King Halim",
+  "Bullion Spot",
+  "Minigold",
+];
+
 function App() {
   const [transactions, setTransactions] = useState(loadGoldData);
+  const [page, setPage] = useState("dashboard");
+  const [theme, setTheme] = useState("emerald");
 
   const [form, setForm] = useState({
     jenisLM: "Antam",
@@ -12,48 +24,56 @@ function App() {
     hargaTotal: "",
   });
 
-  const totalGram = useMemo(() => {
-    return transactions.reduce(
-      (total, item) => total + item.gramasi * item.jumlah,
-      0
-    );
-  }, [transactions]);
-
-  const totalModal = useMemo(() => {
-    return transactions.reduce(
-      (total, item) => total + item.hargaTotal,
-      0
-    );
-  }, [transactions]);
-
-  const hargaRataRata = totalGram > 0 ? totalModal / totalGram : 0;
-
-  const totalKeping = transactions.reduce(
-    (total, item) => total + item.jumlah,
-    0
-  );
-
-  const formatRupiah = (number) => {
-    return new Intl.NumberFormat("id-ID", {
+  const formatRupiah = (number) =>
+    new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
     }).format(number);
-  };
 
-  const formatNumber = (number) => {
-    return new Intl.NumberFormat("id-ID").format(number);
-  };
+  const formatNumber = (number) =>
+    new Intl.NumberFormat("id-ID", {
+      maximumFractionDigits: 2,
+    }).format(number);
 
-  const hargaInput = Number(form.hargaTotal) || 0;
-  const gramasiInput = Number(form.gramasi) || 0;
-  const jumlahInput = Number(form.jumlah) || 0;
+  const totalGram = useMemo(
+    () =>
+      transactions.reduce(
+        (total, item) =>
+          total + Number(item.gramasi) * Number(item.jumlah),
+        0
+      ),
+    [transactions]
+  );
 
-  const totalGramInput = gramasiInput * jumlahInput;
+  const totalModal = useMemo(
+    () =>
+      transactions.reduce(
+        (total, item) => total + Number(item.hargaTotal),
+        0
+      ),
+    [transactions]
+  );
+
+  const totalKeping = useMemo(
+    () =>
+      transactions.reduce(
+        (total, item) => total + Number(item.jumlah),
+        0
+      ),
+    [transactions]
+  );
+
+  const hargaRataRata =
+    totalGram > 0 ? totalModal / totalGram : 0;
+
+  const totalGramInput =
+    (Number(form.gramasi) || 0) *
+    (Number(form.jumlah) || 0);
 
   const hargaPerGramInput =
     totalGramInput > 0
-      ? hargaInput / totalGramInput
+      ? (Number(form.hargaTotal) || 0) / totalGramInput
       : 0;
 
   const handleChange = (e) => {
@@ -68,11 +88,15 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const gramasi = Number(form.gramasi);
+    const jumlah = Number(form.jumlah);
+    const hargaTotal = Number(form.hargaTotal);
+
     if (
       !form.jenisLM ||
-      gramasiInput <= 0 ||
-      jumlahInput <= 0 ||
-      hargaInput <= 0
+      gramasi <= 0 ||
+      jumlah <= 0 ||
+      hargaTotal <= 0
     ) {
       alert("Lengkapi semua data pembelian.");
       return;
@@ -81,9 +105,9 @@ function App() {
     const newTransaction = {
       id: Date.now(),
       jenisLM: form.jenisLM,
-      gramasi: gramasiInput,
-      jumlah: jumlahInput,
-      hargaTotal: hargaInput,
+      gramasi,
+      jumlah,
+      hargaTotal,
       tanggal: new Date().toISOString(),
     };
 
@@ -102,15 +126,13 @@ function App() {
       hargaTotal: "",
     });
 
-    alert("Pembelian berhasil disimpan.");
+    setPage("dashboard");
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Hapus transaksi ini?"
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm("Hapus transaksi ini?")) {
+      return;
+    }
 
     const updatedTransactions = transactions.filter(
       (item) => item.id !== id
@@ -120,321 +142,337 @@ function App() {
     saveGoldData(updatedTransactions);
   };
 
-  const formatDate = (date) => {
-    return new Intl.DateTimeFormat("id-ID", {
+  const formatDate = (date) =>
+    new Intl.DateTimeFormat("id-ID", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     }).format(new Date(date));
+
+  const getBrandSummary = () => {
+    return BRANDS.map((brand) => {
+      const gram = transactions
+        .filter((item) => item.jenisLM === brand)
+        .reduce(
+          (total, item) =>
+            total +
+            Number(item.gramasi) * Number(item.jumlah),
+          0
+        );
+
+      return {
+        brand,
+        gram,
+        percentage:
+          totalGram > 0 ? (gram / totalGram) * 100 : 0,
+      };
+    }).filter((item) => item.gram > 0);
   };
 
+  const brandSummary = getBrandSummary();
+
   return (
-    <div className="app">
-      <header className="topbar">
-        <div>
-          <div className="logo">
-            GOLD<span>SAVE</span>
+    <div className={`app theme-${theme}`}>
+
+      {/* NAVBAR */}
+      <header className="navbar">
+        <div className="brand">
+          <div className="brand-mark">Au</div>
+
+          <div>
+            <div className="logo">
+              GOLD<span>SAVE</span>
+            </div>
+
+            <div className="logo-subtitle">
+              Personal Gold Savings
+            </div>
           </div>
-          <p className="subtitle">
-            Personal Gold Savings
-          </p>
         </div>
 
-        <div className="header-badge">
-          {totalKeping} Keping
+        <nav className="nav-menu">
+          <button
+            className={
+              page === "dashboard"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() => setPage("dashboard")}
+          >
+            Dashboard
+          </button>
+
+          <button
+            className={
+              page === "purchase"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() => setPage("purchase")}
+          >
+            Pembelian
+          </button>
+        </nav>
+
+        <div className="nav-actions">
+          <select
+            className="theme-select"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            aria-label="Pilih tema"
+          >
+            <option value="emerald">
+              Emerald
+            </option>
+            <option value="dark-gold">
+              Dark Gold
+            </option>
+            <option value="midnight">
+              Midnight
+            </option>
+          </select>
+
+          <div className="coin-count">
+            {totalKeping} Keping
+          </div>
         </div>
       </header>
 
-      <main className="container">
+      <main className="main-container">
 
-        {/* STATISTIC CARDS */}
-        <section className="stats-grid">
+        {page === "dashboard" ? (
+          <Dashboard
+            totalGram={totalGram}
+            totalModal={totalModal}
+            hargaRataRata={hargaRataRata}
+            totalKeping={totalKeping}
+            transactions={transactions}
+            brandSummary={brandSummary}
+            formatRupiah={formatRupiah}
+            formatNumber={formatNumber}
+            formatDate={formatDate}
+            handleDelete={handleDelete}
+            onAddPurchase={() => setPage("purchase")}
+          />
+        ) : (
+          <Purchase
+            form={form}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            totalGramInput={totalGramInput}
+            hargaPerGramInput={hargaPerGramInput}
+            formatRupiah={formatRupiah}
+            onBack={() => setPage("dashboard")}
+          />
+        )}
 
-          <div className="stat-card primary">
-            <div className="stat-label">
-              TOTAL EMAS
-            </div>
+      </main>
 
-            <div className="stat-value">
-              {formatNumber(totalGram)}
-              <span> gram</span>
-            </div>
+      <footer>
+        GOLD SAVE • Personal Gold Savings
+      </footer>
+    </div>
+  );
+}
 
-            <div className="stat-bottom">
-              {totalKeping} keping emas
-            </div>
-          </div>
 
-          <div className="stat-card">
-            <div className="stat-label">
-              TOTAL MODAL
-            </div>
+/* =========================
+   DASHBOARD
+========================= */
 
-            <div className="stat-value small">
-              {formatRupiah(totalModal)}
-            </div>
+function Dashboard({
+  totalGram,
+  totalModal,
+  hargaRataRata,
+  totalKeping,
+  transactions,
+  brandSummary,
+  formatRupiah,
+  formatNumber,
+  formatDate,
+  handleDelete,
+  onAddPurchase,
+}) {
+  return (
+    <>
+      <section className="hero">
 
-            <div className="stat-bottom">
-              Total harga pembelian
-            </div>
-          </div>
+        <div>
+          <p className="eyebrow">
+            PORTOFOLIO EMAS
+          </p>
 
-          <div className="stat-card">
-            <div className="stat-label">
-              HARGA RATA-RATA
-            </div>
+          <h1>
+            Tabungan emas kamu.
+          </h1>
 
-            <div className="stat-value small">
-              {formatRupiah(hargaRataRata)}
-            </div>
+          <p className="hero-description">
+            Pantau jumlah emas, modal pembelian,
+            dan harga rata-rata dalam satu tampilan.
+          </p>
+        </div>
 
-            <div className="stat-bottom">
-              Per gram
-            </div>
-          </div>
+        <button
+          className="primary-button"
+          onClick={onAddPurchase}
+        >
+          + Tambah Pembelian
+        </button>
 
-        </section>
+      </section>
 
-        <section className="content-grid">
 
-          {/* FORM */}
-          <div className="card">
+      {/* MAIN STATS */}
+      <section className="dashboard-stats">
 
-            <div className="card-header">
-              <div>
-                <h2>Tambah Pembelian</h2>
-                <p>Catat pembelian logam mulia</p>
-              </div>
+        <div className="big-stat">
+          <span>Total Emas</span>
 
-              <div className="card-icon">
-                +
-              </div>
-            </div>
+          <strong>
+            {formatNumber(totalGram)}
+            <small> gram</small>
+          </strong>
 
-            <form onSubmit={handleSubmit}>
+          <p>
+            {totalKeping} keping emas
+          </p>
+        </div>
 
-              <div className="form-group">
-                <label>Jenis LM</label>
+        <div className="stat-card">
+          <span>Total Modal</span>
 
-                <select
-                  name="jenisLM"
-                  value={form.jenisLM}
-                  onChange={handleChange}
-                >
-                  <option value="Antam">Antam</option>
-                  <option value="UBS">UBS</option>
-                  <option value="Galeri24">
-                    Galeri24
-                  </option>
-                  <option value="Lotus Archi">
-                    Lotus Archi
-                  </option>
-                  <option value="Lainnya">
-                    Lainnya
-                  </option>
-                </select>
-              </div>
+          <strong>
+            {formatRupiah(totalModal)}
+          </strong>
 
-              <div className="form-row">
+          <p>
+            Seluruh pembelian
+          </p>
+        </div>
 
-                <div className="form-group">
-                  <label>Gramasi</label>
+        <div className="stat-card">
+          <span>Harga Rata-rata</span>
 
-                  <div className="input-unit">
-                    <input
-                      type="number"
-                      name="gramasi"
-                      value={form.gramasi}
-                      onChange={handleChange}
-                      placeholder="Contoh: 10"
-                      min="0"
-                      step="0.01"
-                    />
+          <strong>
+            {formatRupiah(hargaRataRata)}
+          </strong>
 
-                    <span>gram</span>
-                  </div>
-                </div>
+          <p>
+            Modal per gram
+          </p>
+        </div>
 
-                <div className="form-group">
-                  <label>Jumlah Barang</label>
+      </section>
 
-                  <input
-                    type="number"
-                    name="jumlah"
-                    value={form.jumlah}
-                    onChange={handleChange}
-                    min="1"
-                  />
-                </div>
 
-              </div>
+      {/* LOWER GRID */}
+      <section className="dashboard-grid">
 
-              <div className="form-group">
-                <label>Harga Pembelian</label>
+        {/* PORTFOLIO */}
+        <div className="panel">
 
-                <div className="input-unit">
-                  <span>Rp</span>
-
-                  <input
-                    type="number"
-                    name="hargaTotal"
-                    value={form.hargaTotal}
-                    onChange={handleChange}
-                    placeholder="Contoh: 15000000"
-                    min="0"
-                  />
-                </div>
-              </div>
-
-              {/* PREVIEW */}
-              <div className="calculation-box">
-
-                <div className="calc-row">
-                  <span>Total gram</span>
-
-                  <strong>
-                    {formatNumber(totalGramInput)} gram
-                  </strong>
-                </div>
-
-                <div className="calc-row">
-                  <span>Harga per gram</span>
-
-                  <strong>
-                    {formatRupiah(hargaPerGramInput)}
-                  </strong>
-                </div>
-
-              </div>
-
-              <button
-                type="submit"
-                className="save-button"
-              >
-                Simpan Pembelian
-              </button>
-
-            </form>
-          </div>
-
-          {/* SUMMARY */}
-          <div className="card summary-card">
-
-            <div className="card-header">
-              <div>
-                <h2>Ringkasan</h2>
-                <p>Posisi tabungan emas</p>
-              </div>
-            </div>
-
-            <div className="summary-item">
-              <div>
-                <span>Total Kepemilikan</span>
-                <small>Seluruh LM</small>
-              </div>
-
-              <strong>
-                {formatNumber(totalGram)} g
-              </strong>
-            </div>
-
-            <div className="summary-item">
-              <div>
-                <span>Total Modal</span>
-                <small>Harga beli seluruh LM</small>
-              </div>
-
-              <strong>
-                {formatRupiah(totalModal)}
-              </strong>
-            </div>
-
-            <div className="summary-item">
-              <div>
-                <span>Harga Rata-rata</span>
-                <small>Modal ÷ total gram</small>
-              </div>
-
-              <strong>
-                {formatRupiah(hargaRataRata)}
-              </strong>
-            </div>
-
-            <div className="info-box">
-              <strong>💡 Cara perhitungan</strong>
-
-              <p>
-                Harga rata-rata dihitung dari total
-                modal dibagi total gram emas yang
-                dimiliki.
-              </p>
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* HISTORY */}
-        <section className="card history-card">
-
-          <div className="card-header">
+          <div className="panel-header">
             <div>
-              <h2>Riwayat Pembelian</h2>
-              <p>Daftar transaksi emas</p>
+              <h2>Distribusi Emas</h2>
+              <p>Berdasarkan brand LM</p>
+            </div>
+          </div>
+
+          {brandSummary.length === 0 ? (
+            <div className="empty-small">
+              Belum ada data emas.
+            </div>
+          ) : (
+            <div className="brand-list">
+
+              {brandSummary.map((item) => (
+                <div
+                  className="brand-row"
+                  key={item.brand}
+                >
+
+                  <div className="brand-row-top">
+                    <span>
+                      {item.brand}
+                    </span>
+
+                    <strong>
+                      {formatNumber(item.gram)} g
+                    </strong>
+                  </div>
+
+                  <div className="progress">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${item.percentage}%`,
+                      }}
+                    />
+                  </div>
+
+                  <small>
+                    {item.percentage.toFixed(1)}%
+                    dari total emas
+                  </small>
+
+                </div>
+              ))}
+
+            </div>
+          )}
+
+        </div>
+
+
+        {/* RECENT TRANSACTIONS */}
+        <div className="panel">
+
+          <div className="panel-header">
+
+            <div>
+              <h2>Pembelian Terbaru</h2>
+              <p>Riwayat transaksi</p>
             </div>
 
-            <span className="transaction-count">
-              {transactions.length} transaksi
+            <span className="count-badge">
+              {transactions.length}
             </span>
+
           </div>
 
           {transactions.length === 0 ? (
-
-            <div className="empty-state">
-              <div className="empty-icon">
-                ◇
-              </div>
-
-              <h3>Belum ada pembelian</h3>
-
-              <p>
-                Tambahkan pembelian emas pertama
-                menggunakan form di atas.
-              </p>
+            <div className="empty-small">
+              Belum ada pembelian.
             </div>
-
           ) : (
+            <div className="recent-list">
 
-            <div className="transaction-list">
+              {transactions
+                .slice(0, 5)
+                .map((item) => {
 
-              {transactions.map((item) => {
+                  const gram =
+                    Number(item.gramasi) *
+                    Number(item.jumlah);
 
-                const totalGramItem =
-                  item.gramasi * item.jumlah;
+                  return (
+                    <div
+                      className="recent-item"
+                      key={item.id}
+                    >
 
-                const hargaPerGram =
-                  item.hargaTotal / totalGramItem;
-
-                return (
-                  <div
-                    className="transaction"
-                    key={item.id}
-                  >
-
-                    <div className="transaction-main">
-
-                      <div className="gold-icon">
+                      <div className="gold-circle">
                         Au
                       </div>
 
-                      <div>
+                      <div className="recent-info">
                         <strong>
                           {item.jenisLM}
                         </strong>
 
                         <span>
-                          {item.gramasi} gram ×{" "}
-                          {item.jumlah} keping
+                          {item.gramasi}g ×{" "}
+                          {item.jumlah}
                         </span>
 
                         <small>
@@ -442,65 +480,230 @@ function App() {
                         </small>
                       </div>
 
-                    </div>
-
-                    <div className="transaction-detail">
-
-                      <div>
-                        <span>Total Gram</span>
-                        <strong>
-                          {formatNumber(
-                            totalGramItem
-                          )} g
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>Harga / Gram</span>
-                        <strong>
-                          {formatRupiah(
-                            hargaPerGram
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <span>Total Harga</span>
+                      <div className="recent-value">
                         <strong>
                           {formatRupiah(
                             item.hargaTotal
                           )}
                         </strong>
+
+                        <span>
+                          {formatNumber(gram)} g
+                        </span>
                       </div>
 
+                      <button
+                        className="mini-delete"
+                        onClick={() =>
+                          handleDelete(item.id)
+                        }
+                        title="Hapus"
+                      >
+                        ×
+                      </button>
+
                     </div>
-
-                    <button
-                      className="delete-button"
-                      onClick={() =>
-                        handleDelete(item.id)
-                      }
-                      title="Hapus transaksi"
-                    >
-                      ×
-                    </button>
-
-                  </div>
-                );
-              })}
+                  );
+                })}
 
             </div>
           )}
 
-        </section>
+        </div>
 
-      </main>
+      </section>
+    </>
+  );
+}
 
-      <footer>
-        GOLD SAVE • Personal Gold Savings
-      </footer>
 
-    </div>
+/* =========================
+   PURCHASE
+========================= */
+
+function Purchase({
+  form,
+  handleChange,
+  handleSubmit,
+  totalGramInput,
+  hargaPerGramInput,
+  formatRupiah,
+  onBack,
+}) {
+  return (
+    <section className="purchase-page">
+
+      <button
+        className="back-button"
+        onClick={onBack}
+      >
+        ← Kembali ke Dashboard
+      </button>
+
+      <div className="purchase-heading">
+        <p className="eyebrow">
+          TRANSAKSI
+        </p>
+
+        <h1>
+          Tambah Pembelian
+        </h1>
+
+        <p>
+          Catat pembelian logam mulia kamu.
+        </p>
+      </div>
+
+
+      <div className="purchase-layout">
+
+        <div className="purchase-card">
+
+          <form onSubmit={handleSubmit}>
+
+            <div className="form-group">
+              <label>Jenis Logam Mulia</label>
+
+              <select
+                name="jenisLM"
+                value={form.jenisLM}
+                onChange={handleChange}
+              >
+                {BRANDS.map((brand) => (
+                  <option
+                    key={brand}
+                    value={brand}
+                  >
+                    {brand}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+
+            <div className="form-row">
+
+              <div className="form-group">
+                <label>Gramasi</label>
+
+                <div className="input-unit">
+                  <input
+                    type="number"
+                    name="gramasi"
+                    value={form.gramasi}
+                    onChange={handleChange}
+                    placeholder="Contoh: 10"
+                    min="0"
+                    step="0.01"
+                  />
+
+                  <span>gram</span>
+                </div>
+              </div>
+
+
+              <div className="form-group">
+                <label>Jumlah Barang</label>
+
+                <input
+                  type="number"
+                  name="jumlah"
+                  value={form.jumlah}
+                  onChange={handleChange}
+                  min="1"
+                  step="1"
+                />
+              </div>
+
+            </div>
+
+
+            <div className="form-group">
+              <label>Harga Pembelian</label>
+
+              <div className="input-unit">
+                <span>Rp</span>
+
+                <input
+                  type="number"
+                  name="hargaTotal"
+                  value={form.hargaTotal}
+                  onChange={handleChange}
+                  placeholder="Contoh: 15000000"
+                  min="0"
+                />
+              </div>
+            </div>
+
+
+            {/* LIVE CALCULATION */}
+            <div className="calculation-box">
+
+              <div>
+                <span>Total emas</span>
+
+                <strong>
+                  {totalGramInput} gram
+                </strong>
+              </div>
+
+              <div>
+                <span>Harga per gram</span>
+
+                <strong>
+                  {formatRupiah(
+                    hargaPerGramInput
+                  )}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <button
+              type="submit"
+              className="save-button"
+            >
+              Simpan Pembelian
+            </button>
+
+          </form>
+
+        </div>
+
+
+        {/* SIDE INFORMATION */}
+        <aside className="purchase-info">
+
+          <div className="info-icon">
+            Au
+          </div>
+
+          <h2>
+            Catat dengan konsisten.
+          </h2>
+
+          <p>
+            Setiap pembelian akan menambah
+            jumlah gram dan modal emas kamu.
+            Harga rata-rata dihitung otomatis
+            berdasarkan total modal dibagi
+            total gram.
+          </p>
+
+          <div className="formula">
+            <span>Rumus harga rata-rata</span>
+
+            <strong>
+              Total Modal ÷ Total Gram
+            </strong>
+          </div>
+
+        </aside>
+
+      </div>
+
+    </section>
   );
 }
 
