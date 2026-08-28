@@ -270,7 +270,7 @@ const handleSubmit = (e) => {
   setEditingId(null);
 
   setPage("history");
-};
+}}
           >
             Riwayat
           </button>
