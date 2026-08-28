@@ -243,30 +243,51 @@ function App() {
       year: "numeric",
     }).format(new Date(date));
 
-  const brandSummary = brands
-    .map((brand) => {
-      const gram = transactions
-        .filter(
-          (item) => item.jenisLM === brand
-        )
-        .reduce(
-          (total, item) =>
-            total +
-            Number(item.gramasi) *
-              Number(item.jumlah),
-          0
-        );
+ const brandSummary = brands
+  .map((brand) => {
+    const brandTransactions =
+      transactions.filter(
+        (item) => item.jenisLM === brand
+      );
 
-      return {
-        brand,
-        gram,
-        percentage:
-          totalGram > 0
-            ? (gram / totalGram) * 100
-            : 0,
-      };
-    })
-    .filter((item) => item.gram > 0);
+    const gram = brandTransactions.reduce(
+      (total, item) =>
+        total +
+        Number(item.gramasi) *
+          Number(item.jumlah),
+      0
+    );
+
+    const keping = brandTransactions.reduce(
+      (total, item) =>
+        total + Number(item.jumlah),
+      0
+    );
+
+    const modal = brandTransactions.reduce(
+      (total, item) =>
+        total + Number(item.hargaTotal),
+      0
+    );
+
+    const rataRata =
+      gram > 0
+        ? modal / gram
+        : 0;
+
+    return {
+      brand,
+      gram,
+      keping,
+      modal,
+      rataRata,
+      percentage:
+        totalGram > 0
+          ? (gram / totalGram) * 100
+          : 0,
+    };
+  })
+  .filter((item) => item.gram > 0);
 
   return (
     <div className={`app theme-${theme}`}>
@@ -502,77 +523,127 @@ function Dashboard({
 
       <section className="dashboard-grid">
 
-        <div className="panel">
+    <div className="panel portfolio-panel">
 
-          <div className="panel-header">
+  <div className="panel-header">
 
-            <div>
-              <h2>Distribusi Emas</h2>
-              <p>
-                Berdasarkan brand LM
-              </p>
+    <div>
+      <h2>Portofolio LM</h2>
+
+      <p>
+        Kepemilikan berdasarkan jenis logam
+      </p>
+    </div>
+
+    <span className="count-badge">
+      {brandSummary.length} LM
+    </span>
+
+  </div>
+
+
+  {brandSummary.length === 0 ? (
+
+    <div className="empty-small">
+      Belum ada data emas.
+    </div>
+
+  ) : (
+
+    <div className="portfolio-list">
+
+      {brandSummary.map((item) => (
+
+        <div
+          className="portfolio-card"
+          key={item.brand}
+        >
+
+          <div className="portfolio-top">
+
+            <div className="portfolio-brand">
+
+              <div className="portfolio-icon">
+                Au
+              </div>
+
+              <div>
+                <strong>
+                  {item.brand}
+                </strong>
+
+                <span>
+                  {item.keping} keping
+                </span>
+              </div>
+
+            </div>
+
+            <div className="portfolio-percent">
+              {item.percentage.toFixed(1)}%
             </div>
 
           </div>
 
-          {brandSummary.length === 0 ? (
 
-            <div className="empty-small">
-              Belum ada data emas.
+          <div className="portfolio-gram">
+
+            <strong>
+              {formatNumber(item.gram)}
+            </strong>
+
+            <span>
+              gram
+            </span>
+
+          </div>
+
+
+          <div className="portfolio-details">
+
+            <div>
+              <span>Modal</span>
+
+              <strong>
+                {formatRupiah(item.modal)}
+              </strong>
             </div>
 
-          ) : (
 
-            <div className="brand-list">
+            <div>
+              <span>Rata-rata</span>
 
-              {brandSummary.map((item) => (
-
-                <div
-                  className="brand-row"
-                  key={item.brand}
-                >
-
-                  <div className="brand-row-top">
-
-                    <span>
-                      {item.brand}
-                    </span>
-
-                    <strong>
-                      {formatNumber(
-                        item.gram
-                      )}{" "}
-                      <small>gram</small>
-                    </strong>
-
-                  </div>
-
-                  <div className="progress">
-
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width:
-                          `${item.percentage}%`,
-                      }}
-                    />
-
-                  </div>
-
-                  <small>
-                    {item.percentage.toFixed(1)}%
-                    {" "}dari total emas
-                  </small>
-
-                </div>
-
-              ))}
-
+              <strong>
+                {formatRupiah(
+                  item.rataRata
+                )}
+                <small>/g</small>
+              </strong>
             </div>
 
-          )}
+          </div>
+
+
+          <div className="portfolio-progress">
+
+            <div
+              style={{
+                width:
+                  `${item.percentage}%`,
+              }}
+            />
+
+          </div>
 
         </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
 
 
         <div className="panel">
