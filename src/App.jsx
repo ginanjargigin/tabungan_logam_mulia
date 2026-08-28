@@ -413,6 +413,26 @@ function App() {
 
         <div className="nav-actions">
 
+          <select
+            className="theme-select"
+            value={theme}
+            onChange={(e) =>
+              setTheme(e.target.value)
+            }
+          >
+            <option value="emerald">
+              Emerald
+            </option>
+
+            <option value="dark-gold">
+              Dark Gold
+            </option>
+
+            <option value="midnight">
+              Midnight
+            </option>
+          </select>
+
           <div className="coin-count">
             {totalKeping} Keping
           </div>
@@ -436,8 +456,6 @@ function App() {
             formatNumber={formatNumber}
             formatDate={formatDate}
             handleDelete={handleDelete}
-            theme={theme}
-            setTheme={setTheme}
             onAddPurchase={() => {
               setEditingId(null);
               setForm({
@@ -523,8 +541,6 @@ function Dashboard({
   formatNumber,
   formatDate,
   handleDelete,
-  theme,
-  setTheme,
   onAddPurchase,
 }) {
   return (
@@ -552,67 +568,6 @@ function Dashboard({
         >
           + Tambah Pembelian
         </button>
-
-      </section>
-
-      <section className="dashboard-settings">
-
-        <div>
-          <span className="settings-label">
-            TEMA TAMPILAN
-          </span>
-
-          <strong>
-            Pilih tampilan dashboard
-          </strong>
-
-          <p>
-            Tema hanya berlaku untuk tampilan aplikasi.
-          </p>
-        </div>
-
-        <div className="theme-options">
-
-          <button
-            type="button"
-            className={
-              theme === "emerald"
-                ? "theme-option active"
-                : "theme-option"
-            }
-            onClick={() => setTheme("emerald")}
-          >
-            <span className="theme-dot emerald-dot" />
-            Emerald
-          </button>
-
-          <button
-            type="button"
-            className={
-              theme === "dark-gold"
-                ? "theme-option active"
-                : "theme-option"
-            }
-            onClick={() => setTheme("dark-gold")}
-          >
-            <span className="theme-dot gold-dot" />
-            Dark Gold
-          </button>
-
-          <button
-            type="button"
-            className={
-              theme === "midnight"
-                ? "theme-option active"
-                : "theme-option"
-            }
-            onClick={() => setTheme("midnight")}
-          >
-            <span className="theme-dot midnight-dot" />
-            Midnight
-          </button>
-
-        </div>
 
       </section>
 
