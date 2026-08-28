@@ -242,40 +242,46 @@ const handleSubmit = (e) => {
   saveGoldData(updatedTransactions);
 
 
-  // Simpan LM baru
-  if (
-    form.jenisLM === "Lainnya" &&
-    !brands.includes(jenisLM)
-  ) {
-
-    const updatedBrands = [
-      ...brands,
-      jenisLM,
-    ];
-
-    setBrands(updatedBrands);
-    saveBrands(updatedBrands);
-
-  }
-
-
-  setForm({
-    jenisLM,
-    customJenisLM: "",
-    gramasi: "",
-    jumlah: 1,
-    hargaTotal: "",
-  });
-
-  setEditingId(null);
-
-  setPage("history");
-}}
+          // Simpan LM baru
+          if (
+            form.jenisLM === "Lainnya" &&
+            !brands.includes(jenisLM)
+          ) {
+            const updatedBrands = [
+              ...brands,
+              jenisLM,
+            ];
+          
+            setBrands(updatedBrands);
+            saveBrands(updatedBrands);
+          }
+          
+          setForm({
+            jenisLM,
+            customJenisLM: "",
+            gramasi: "",
+            jumlah: 1,
+            hargaTotal: "",
+          });
+          
+          setEditingId(null);
+          
+          setPage("history");
+          };   // ← AKHIR handleSubmit
+          
+          
+          // setelah itu baru JSX menu
+          
+          <button
+            className={
+              page === "history"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() => setPage("history")}
           >
             Riwayat
           </button>
-        
-        </nav>
 
         <div className="nav-actions">
 
