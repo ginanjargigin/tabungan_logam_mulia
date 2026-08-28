@@ -695,6 +695,7 @@ function Purchase({
   totalGramInput,
   hargaPerGramInput,
   formatRupiah,
+  formatNumber,
   formatPriceInput,
   onBack,
 }) {
