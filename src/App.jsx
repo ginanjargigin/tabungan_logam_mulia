@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import "./App.css";
 import { loadGoldData, saveGoldData } from "./storage";
 
-const BRANDS = [
+const DEFAULT_BRANDS = [
   "Antam",
   "UBS",
   "Hartadinata",
@@ -12,13 +12,52 @@ const BRANDS = [
   "Minigold",
 ];
 
+const BRAND_STORAGE_KEY = "gold-save-brands";
+
+function loadBrands() {
+  try {
+    const data = localStorage.getItem(BRAND_STORAGE_KEY);
+
+    if (!data) {
+      return DEFAULT_BRANDS;
+    }
+
+    const customBrands = JSON.parse(data);
+
+    return [
+      ...new Set([
+        ...DEFAULT_BRANDS,
+        ...customBrands,
+      ]),
+    ];
+  } catch {
+    return DEFAULT_BRANDS;
+  }
+}
+
+function saveBrands(brands) {
+  localStorage.setItem(
+    BRAND_STORAGE_KEY,
+    JSON.stringify(brands)
+  );
+}
+
 function App() {
-  const [transactions, setTransactions] = useState(loadGoldData);
-  const [page, setPage] = useState("dashboard");
-  const [theme, setTheme] = useState("emerald");
+  const [transactions, setTransactions] =
+    useState(loadGoldData);
+
+  const [brands, setBrands] =
+    useState(loadBrands);
+
+  const [page, setPage] =
+    useState("dashboard");
+
+  const [theme, setTheme] =
+    useState("emerald");
 
   const [form, setForm] = useState({
     jenisLM: "Antam",
+    customJenisLM: "",
     gramasi: "",
     jumlah: 1,
     hargaTotal: "",
@@ -36,11 +75,25 @@ function App() {
       maximumFractionDigits: 2,
     }).format(number);
 
+  const formatPriceInput = (value) => {
+    if (!value) return "";
+
+    const number = Number(
+      String(value).replace(/\D/g, "")
+    );
+
+    if (!number) return "";
+
+    return new Intl.NumberFormat("id-ID").format(number);
+  };
+
   const totalGram = useMemo(
     () =>
       transactions.reduce(
         (total, item) =>
-          total + Number(item.gramasi) * Number(item.jumlah),
+          total +
+          Number(item.gramasi) *
+            Number(item.jumlah),
         0
       ),
     [transactions]
@@ -49,7 +102,8 @@ function App() {
   const totalModal = useMemo(
     () =>
       transactions.reduce(
-        (total, item) => total + Number(item.hargaTotal),
+        (total, item) =>
+          total + Number(item.hargaTotal),
         0
       ),
     [transactions]
@@ -58,14 +112,17 @@ function App() {
   const totalKeping = useMemo(
     () =>
       transactions.reduce(
-        (total, item) => total + Number(item.jumlah),
+        (total, item) =>
+          total + Number(item.jumlah),
         0
       ),
     [transactions]
   );
 
   const hargaRataRata =
-    totalGram > 0 ? totalModal / totalGram : 0;
+    totalGram > 0
+      ? totalModal / totalGram
+      : 0;
 
   const totalGramInput =
     (Number(form.gramasi) || 0) *
@@ -73,11 +130,23 @@ function App() {
 
   const hargaPerGramInput =
     totalGramInput > 0
-      ? (Number(form.hargaTotal) || 0) / totalGramInput
+      ? (Number(form.hargaTotal) || 0) /
+        totalGramInput
       : 0;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "hargaTotal") {
+      const cleanValue = value.replace(/\D/g, "");
+
+      setForm((prev) => ({
+        ...prev,
+        hargaTotal: cleanValue,
+      }));
+
+      return;
+    }
 
     setForm((prev) => ({
       ...prev,
@@ -88,12 +157,21 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const jenisLM =
+      form.jenisLM === "Lainnya"
+        ? form.customJenisLM.trim()
+        : form.jenisLM;
+
     const gramasi = Number(form.gramasi);
     const jumlah = Number(form.jumlah);
     const hargaTotal = Number(form.hargaTotal);
 
+    if (!jenisLM) {
+      alert("Masukkan nama logam mulia.");
+      return;
+    }
+
     if (
-      !form.jenisLM ||
       gramasi <= 0 ||
       jumlah <= 0 ||
       hargaTotal <= 0
@@ -104,7 +182,7 @@ function App() {
 
     const newTransaction = {
       id: Date.now(),
-      jenisLM: form.jenisLM,
+      jenisLM,
       gramasi,
       jumlah,
       hargaTotal,
@@ -119,8 +197,23 @@ function App() {
     setTransactions(updatedTransactions);
     saveGoldData(updatedTransactions);
 
+    // Simpan jenis LM baru
+    if (
+      form.jenisLM === "Lainnya" &&
+      !brands.includes(jenisLM)
+    ) {
+      const updatedBrands = [
+        ...brands,
+        jenisLM,
+      ];
+
+      setBrands(updatedBrands);
+      saveBrands(updatedBrands);
+    }
+
     setForm({
-      jenisLM: "Antam",
+      jenisLM,
+      customJenisLM: "",
       gramasi: "",
       jumlah: 1,
       hargaTotal: "",
@@ -134,9 +227,10 @@ function App() {
       return;
     }
 
-    const updatedTransactions = transactions.filter(
-      (item) => item.id !== id
-    );
+    const updatedTransactions =
+      transactions.filter(
+        (item) => item.id !== id
+      );
 
     setTransactions(updatedTransactions);
     saveGoldData(updatedTransactions);
@@ -149,14 +243,17 @@ function App() {
       year: "numeric",
     }).format(new Date(date));
 
-  const getBrandSummary = () => {
-    return BRANDS.map((brand) => {
+  const brandSummary = brands
+    .map((brand) => {
       const gram = transactions
-        .filter((item) => item.jenisLM === brand)
+        .filter(
+          (item) => item.jenisLM === brand
+        )
         .reduce(
           (total, item) =>
             total +
-            Number(item.gramasi) * Number(item.jumlah),
+            Number(item.gramasi) *
+              Number(item.jumlah),
           0
         );
 
@@ -164,20 +261,22 @@ function App() {
         brand,
         gram,
         percentage:
-          totalGram > 0 ? (gram / totalGram) * 100 : 0,
+          totalGram > 0
+            ? (gram / totalGram) * 100
+            : 0,
       };
-    }).filter((item) => item.gram > 0);
-  };
-
-  const brandSummary = getBrandSummary();
+    })
+    .filter((item) => item.gram > 0);
 
   return (
     <div className={`app theme-${theme}`}>
 
-      {/* NAVBAR */}
       <header className="navbar">
+
         <div className="brand">
-          <div className="brand-mark">Au</div>
+          <div className="brand-mark">
+            Au
+          </div>
 
           <div>
             <div className="logo">
@@ -191,13 +290,16 @@ function App() {
         </div>
 
         <nav className="nav-menu">
+
           <button
             className={
               page === "dashboard"
                 ? "nav-button active"
                 : "nav-button"
             }
-            onClick={() => setPage("dashboard")}
+            onClick={() =>
+              setPage("dashboard")
+            }
           >
             Dashboard
           </button>
@@ -208,25 +310,32 @@ function App() {
                 ? "nav-button active"
                 : "nav-button"
             }
-            onClick={() => setPage("purchase")}
+            onClick={() =>
+              setPage("purchase")
+            }
           >
             Pembelian
           </button>
+
         </nav>
 
         <div className="nav-actions">
+
           <select
             className="theme-select"
             value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            aria-label="Pilih tema"
+            onChange={(e) =>
+              setTheme(e.target.value)
+            }
           >
             <option value="emerald">
               Emerald
             </option>
+
             <option value="dark-gold">
               Dark Gold
             </option>
+
             <option value="midnight">
               Midnight
             </option>
@@ -235,12 +344,16 @@ function App() {
           <div className="coin-count">
             {totalKeping} Keping
           </div>
+
         </div>
+
       </header>
+
 
       <main className="main-container">
 
         {page === "dashboard" ? (
+
           <Dashboard
             totalGram={totalGram}
             totalModal={totalModal}
@@ -252,18 +365,31 @@ function App() {
             formatNumber={formatNumber}
             formatDate={formatDate}
             handleDelete={handleDelete}
-            onAddPurchase={() => setPage("purchase")}
+            onAddPurchase={() =>
+              setPage("purchase")
+            }
           />
+
         ) : (
+
           <Purchase
             form={form}
+            brands={brands}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
             totalGramInput={totalGramInput}
-            hargaPerGramInput={hargaPerGramInput}
+            hargaPerGramInput={
+              hargaPerGramInput
+            }
             formatRupiah={formatRupiah}
-            onBack={() => setPage("dashboard")}
+            formatPriceInput={
+              formatPriceInput
+            }
+            onBack={() =>
+              setPage("dashboard")
+            }
           />
+
         )}
 
       </main>
@@ -271,6 +397,7 @@ function App() {
       <footer>
         GOLD SAVE • Personal Gold Savings
       </footer>
+
     </div>
   );
 }
@@ -322,23 +449,26 @@ function Dashboard({
       </section>
 
 
-      {/* MAIN STATS */}
       <section className="dashboard-stats">
 
         <div className="big-stat">
+
           <span>Total Emas</span>
 
           <strong>
             {formatNumber(totalGram)}
-            <small> gram</small>
+            <small>gram</small>
           </strong>
 
           <p>
             {totalKeping} keping emas
           </p>
+
         </div>
 
+
         <div className="stat-card">
+
           <span>Total Modal</span>
 
           <strong>
@@ -348,9 +478,12 @@ function Dashboard({
           <p>
             Seluruh pembelian
           </p>
+
         </div>
 
+
         <div className="stat-card">
+
           <span>Harga Rata-rata</span>
 
           <strong>
@@ -360,78 +493,97 @@ function Dashboard({
           <p>
             Modal per gram
           </p>
+
         </div>
 
       </section>
 
 
-      {/* LOWER GRID */}
       <section className="dashboard-grid">
 
-        {/* PORTFOLIO */}
         <div className="panel">
 
           <div className="panel-header">
+
             <div>
               <h2>Distribusi Emas</h2>
-              <p>Berdasarkan brand LM</p>
+              <p>
+                Berdasarkan brand LM
+              </p>
             </div>
+
           </div>
 
           {brandSummary.length === 0 ? (
+
             <div className="empty-small">
               Belum ada data emas.
             </div>
+
           ) : (
+
             <div className="brand-list">
 
               {brandSummary.map((item) => (
+
                 <div
                   className="brand-row"
                   key={item.brand}
                 >
 
                   <div className="brand-row-top">
+
                     <span>
                       {item.brand}
                     </span>
 
                     <strong>
-                      {formatNumber(item.gram)} g
+                      {formatNumber(
+                        item.gram
+                      )}{" "}
+                      <small>gram</small>
                     </strong>
+
                   </div>
 
                   <div className="progress">
+
                     <div
                       className="progress-fill"
                       style={{
-                        width: `${item.percentage}%`,
+                        width:
+                          `${item.percentage}%`,
                       }}
                     />
+
                   </div>
 
                   <small>
                     {item.percentage.toFixed(1)}%
-                    dari total emas
+                    {" "}dari total emas
                   </small>
 
                 </div>
+
               ))}
 
             </div>
+
           )}
 
         </div>
 
 
-        {/* RECENT TRANSACTIONS */}
         <div className="panel">
 
           <div className="panel-header">
 
             <div>
               <h2>Pembelian Terbaru</h2>
-              <p>Riwayat transaksi</p>
+
+              <p>
+                Riwayat transaksi
+              </p>
             </div>
 
             <span className="count-badge">
@@ -440,11 +592,15 @@ function Dashboard({
 
           </div>
 
+
           {transactions.length === 0 ? (
+
             <div className="empty-small">
               Belum ada pembelian.
             </div>
+
           ) : (
+
             <div className="recent-list">
 
               {transactions
@@ -466,21 +622,26 @@ function Dashboard({
                       </div>
 
                       <div className="recent-info">
+
                         <strong>
                           {item.jenisLM}
                         </strong>
 
                         <span>
-                          {item.gramasi}g ×{" "}
+                          {item.gramasi} gram ×{" "}
                           {item.jumlah}
                         </span>
 
                         <small>
-                          {formatDate(item.tanggal)}
+                          {formatDate(
+                            item.tanggal
+                          )}
                         </small>
+
                       </div>
 
                       <div className="recent-value">
+
                         <strong>
                           {formatRupiah(
                             item.hargaTotal
@@ -488,14 +649,17 @@ function Dashboard({
                         </strong>
 
                         <span>
-                          {formatNumber(gram)} g
+                          {formatNumber(gram)} gram
                         </span>
+
                       </div>
 
                       <button
                         className="mini-delete"
                         onClick={() =>
-                          handleDelete(item.id)
+                          handleDelete(
+                            item.id
+                          )
                         }
                         title="Hapus"
                       >
@@ -507,6 +671,7 @@ function Dashboard({
                 })}
 
             </div>
+
           )}
 
         </div>
@@ -523,11 +688,13 @@ function Dashboard({
 
 function Purchase({
   form,
+  brands,
   handleChange,
   handleSubmit,
   totalGramInput,
   hargaPerGramInput,
   formatRupiah,
+  formatPriceInput,
   onBack,
 }) {
   return (
@@ -540,7 +707,9 @@ function Purchase({
         ← Kembali ke Dashboard
       </button>
 
+
       <div className="purchase-heading">
+
         <p className="eyebrow">
           TRANSAKSI
         </p>
@@ -552,6 +721,7 @@ function Purchase({
         <p>
           Catat pembelian logam mulia kamu.
         </p>
+
       </div>
 
 
@@ -562,31 +732,75 @@ function Purchase({
           <form onSubmit={handleSubmit}>
 
             <div className="form-group">
-              <label>Jenis Logam Mulia</label>
+
+              <label>
+                Jenis Logam Mulia
+              </label>
 
               <select
                 name="jenisLM"
                 value={form.jenisLM}
                 onChange={handleChange}
               >
-                {BRANDS.map((brand) => (
+
+                {brands.map((brand) => (
+
                   <option
                     key={brand}
                     value={brand}
                   >
                     {brand}
                   </option>
+
                 ))}
+
+                <option value="Lainnya">
+                  + Tambahkan LM Baru
+                </option>
+
               </select>
+
             </div>
+
+
+            {form.jenisLM === "Lainnya" && (
+
+              <div className="form-group">
+
+                <label>
+                  Nama Logam Mulia Baru
+                </label>
+
+                <input
+                  type="text"
+                  name="customJenisLM"
+                  value={
+                    form.customJenisLM
+                  }
+                  onChange={handleChange}
+                  placeholder="Contoh: Galeri 24"
+                />
+
+                <div className="input-hint">
+                  Nama ini akan tersimpan
+                  untuk pembelian berikutnya.
+                </div>
+
+              </div>
+
+            )}
 
 
             <div className="form-row">
 
               <div className="form-group">
-                <label>Gramasi</label>
+
+                <label>
+                  Gramasi
+                </label>
 
                 <div className="input-unit">
+
                   <input
                     type="number"
                     name="gramasi"
@@ -597,13 +811,20 @@ function Purchase({
                     step="0.01"
                   />
 
-                  <span>gram</span>
+                  <span>
+                    gram
+                  </span>
+
                 </div>
+
               </div>
 
 
               <div className="form-group">
-                <label>Jumlah Barang</label>
+
+                <label>
+                  Jumlah Barang
+                </label>
 
                 <input
                   type="number"
@@ -613,48 +834,75 @@ function Purchase({
                   min="1"
                   step="1"
                 />
+
               </div>
 
             </div>
 
 
             <div className="form-group">
-              <label>Harga Pembelian</label>
+
+              <label>
+                Harga Pembelian
+              </label>
 
               <div className="input-unit">
-                <span>Rp</span>
+
+                <span>
+                  Rp
+                </span>
 
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="hargaTotal"
-                  value={form.hargaTotal}
+                  value={formatPriceInput(
+                    form.hargaTotal
+                  )}
                   onChange={handleChange}
-                  placeholder="Contoh: 15000000"
-                  min="0"
+                  placeholder="Contoh: 15.000.000"
                 />
+
               </div>
+
+              <div className="input-hint">
+                Gunakan angka saja. Pemisah
+                ribuan ditambahkan otomatis.
+              </div>
+
             </div>
 
 
-            {/* LIVE CALCULATION */}
             <div className="calculation-box">
 
               <div>
-                <span>Total emas</span>
+
+                <span>
+                  Total emas
+                </span>
 
                 <strong>
-                  {totalGramInput} gram
+                  {formatNumber(
+                    totalGramInput
+                  )}{" "}
+                  gram
                 </strong>
+
               </div>
 
+
               <div>
-                <span>Harga per gram</span>
+
+                <span>
+                  Harga per gram
+                </span>
 
                 <strong>
                   {formatRupiah(
                     hargaPerGramInput
                   )}
                 </strong>
+
               </div>
 
             </div>
@@ -672,7 +920,6 @@ function Purchase({
         </div>
 
 
-        {/* SIDE INFORMATION */}
         <aside className="purchase-info">
 
           <div className="info-icon">
@@ -692,11 +939,15 @@ function Purchase({
           </p>
 
           <div className="formula">
-            <span>Rumus harga rata-rata</span>
+
+            <span>
+              Rumus harga rata-rata
+            </span>
 
             <strong>
               Total Modal ÷ Total Gram
             </strong>
+
           </div>
 
         </aside>
