@@ -301,17 +301,24 @@ button {
 }
 
 .big-stat strong {
-  display: block;
+  display: flex;
+  align-items: baseline;
 
   margin-top: 14px;
 
   font-size: 36px;
-  letter-spacing: -1.8px;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
 }
 
 .big-stat strong small {
-  font-size: 13px;
-  font-weight: 500;
+  display: inline-block;
+
+  margin-left: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .stat-card strong {
