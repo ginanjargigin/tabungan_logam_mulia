@@ -459,6 +459,19 @@ button {
   color: var(--text-soft);
   font-size: 9px;
 }
+.brand-row-top strong {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+
+  font-size: 11px;
+}
+
+.brand-row-top strong small {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-soft);
+}
 
 
 /* =========================
@@ -505,14 +518,15 @@ button {
   display: block;
   font-size: 11px;
 }
-
 .recent-info span {
   display: block;
 
-  margin-top: 3px;
+  margin-top: 5px;
 
   color: var(--text-soft);
+
   font-size: 9px;
+  letter-spacing: 0.1px;
 }
 
 .recent-info small {
@@ -652,7 +666,14 @@ select {
 
   transition: 0.2s ease;
 }
+.input-hint {
+  margin-top: 6px;
 
+  color: var(--text-soft);
+
+  font-size: 9px;
+  line-height: 1.4;
+}
 /* FOCUS HIJAU MUDA */
 
 input:focus,
