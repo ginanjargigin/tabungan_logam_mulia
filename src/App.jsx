@@ -64,6 +64,13 @@ function App() {
     hargaTotal: "",
   });
 
+  const [saleForm, setSaleForm] = useState({
+    jenisLM: "",
+    gramasi: "",
+    jumlah: 1,
+    hargaTotal: "",
+  });
+
   const formatRupiah = (number) =>
     new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -100,23 +107,27 @@ function App() {
 
   const totalGram = useMemo(
     () =>
-      transactions.reduce(
-        (total, item) =>
-          total +
+      transactions.reduce((total, item) => {
+        const gram =
           Number(item.gramasi) *
-            Number(item.jumlah),
-        0
-      ),
+          Number(item.jumlah);
+
+        return item.type === "sale"
+          ? total - gram
+          : total + gram;
+      }, 0),
     [transactions]
   );
 
   const totalModal = useMemo(
     () =>
-      transactions.reduce(
-        (total, item) =>
-          total + Number(item.hargaTotal),
-        0
-      ),
+      transactions.reduce((total, item) => {
+        if (item.type === "sale") {
+          return total - Number(item.costBasis || 0);
+        }
+
+        return total + Number(item.hargaTotal || 0);
+      }, 0),
     [transactions]
   );
 
@@ -124,7 +135,9 @@ function App() {
     () =>
       transactions.reduce(
         (total, item) =>
-          total + Number(item.jumlah),
+          item.type === "sale"
+            ? total - Number(item.jumlah)
+            : total + Number(item.jumlah),
         0
       ),
     [transactions]
@@ -156,24 +169,35 @@ function App() {
 
           const gram =
             brandTransactions.reduce(
-              (total, item) =>
-                total +
-                Number(item.gramasi) *
-                  Number(item.jumlah),
+              (total, item) => {
+                const itemGram =
+                  Number(item.gramasi) *
+                  Number(item.jumlah);
+
+                return item.type === "sale"
+                  ? total - itemGram
+                  : total + itemGram;
+              },
               0
             );
 
           const keping =
             brandTransactions.reduce(
               (total, item) =>
-                total + Number(item.jumlah),
+                item.type === "sale"
+                  ? total - Number(item.jumlah)
+                  : total + Number(item.jumlah),
               0
             );
 
           const modal =
             brandTransactions.reduce(
               (total, item) =>
-                total + Number(item.hargaTotal),
+                item.type === "sale"
+                  ? total -
+                    Number(item.costBasis || 0)
+                  : total +
+                    Number(item.hargaTotal || 0),
               0
             );
 
@@ -196,6 +220,91 @@ function App() {
     [brands, transactions, totalGram]
   );
 
+  // Lot yang masih tersedia untuk penjualan,
+  // dihitung berdasarkan merk + gramasi.
+  const getAvailableLots = (brand) => {
+    const lotMap = new Map();
+
+    transactions
+      .filter((item) => item.jenisLM === brand)
+      .forEach((item) => {
+        const gramasi = Number(item.gramasi);
+
+        if (!gramasi) return;
+
+        const current = lotMap.get(gramasi) || 0;
+
+        if (item.type === "sale") {
+          lotMap.set(
+            gramasi,
+            current - Number(item.jumlah)
+          );
+        } else {
+          lotMap.set(
+            gramasi,
+            current + Number(item.jumlah)
+          );
+        }
+      });
+
+    return [...lotMap.entries()]
+      .filter(([, jumlah]) => jumlah > 0)
+      .sort((a, b) => a[0] - b[0])
+      .map(([gramasi, jumlah]) => ({
+        gramasi,
+        jumlah,
+      }));
+  };
+
+  const ownedBrandOptions = brandSummary.filter(
+    (item) => item.gram > 0 && item.keping > 0
+  );
+
+  const selectedSaleBrand =
+    brandSummary.find(
+      (item) => item.brand === saleForm.jenisLM
+    ) || null;
+
+  const availableSaleLots = selectedSaleBrand
+    ? getAvailableLots(selectedSaleBrand.brand)
+    : [];
+
+  const selectedSaleLot =
+    availableSaleLots.find(
+      (item) =>
+        Number(item.gramasi) ===
+        Number(saleForm.gramasi)
+    ) || null;
+
+  const saleTotalGram =
+    (Number(saleForm.gramasi) || 0) *
+    (Number(saleForm.jumlah) || 0);
+
+  // Harga beli otomatis berasal dari rata-rata
+  // merk tersebut yang tampil pada Portofolio LM.
+  const salePurchasePricePerGram =
+    selectedSaleBrand?.rataRata || 0;
+
+  const salePricePerGram =
+    saleTotalGram > 0
+      ? (Number(saleForm.hargaTotal) || 0) /
+        saleTotalGram
+      : 0;
+
+  const saleCostBasis =
+    salePurchasePricePerGram *
+    saleTotalGram;
+
+  // Positif = harga jual lebih tinggi.
+  // Negatif = harga jual lebih rendah.
+  const saleDifferencePerGram =
+    salePricePerGram -
+    salePurchasePricePerGram;
+
+  const saleDifferenceTotal =
+    saleDifferencePerGram *
+    saleTotalGram;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -215,6 +324,121 @@ function App() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleSaleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "hargaTotal") {
+      setSaleForm((prev) => ({
+        ...prev,
+        hargaTotal: value.replace(/\\D/g, ""),
+      }));
+
+      return;
+    }
+
+    setSaleForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmitSale = (e) => {
+    e.preventDefault();
+
+    const jenisLM =
+      saleForm.jenisLM.trim();
+
+    const gramasi = Number(saleForm.gramasi);
+    const jumlah = Number(saleForm.jumlah);
+    const hargaTotal = Number(saleForm.hargaTotal);
+
+    const brand = brandSummary.find(
+      (item) => item.brand === jenisLM
+    );
+
+    const availableLot =
+      getAvailableLots(jenisLM).find(
+        (item) =>
+          Number(item.gramasi) === gramasi
+      );
+
+    const availableJumlah =
+      availableLot?.jumlah || 0;
+
+    if (!brand) {
+      alert("Pilih merk logam mulia.");
+      return;
+    }
+
+    if (gramasi <= 0 || jumlah <= 0 || hargaTotal <= 0) {
+      alert("Lengkapi semua data penjualan.");
+      return;
+    }
+
+    if (availableJumlah <= 0) {
+      alert("Gramasi tersebut tidak tersedia.");
+      return;
+    }
+
+    if (jumlah > availableJumlah) {
+      alert(
+        `Stok ${gramasi} gram hanya tersedia ${availableJumlah} keping.`
+      );
+      return;
+    }
+
+    const purchasePricePerGram =
+      brand.rataRata;
+
+    const totalGram =
+      gramasi * jumlah;
+
+    const salePricePerGram =
+      hargaTotal / totalGram;
+
+    const costBasis =
+      purchasePricePerGram * totalGram;
+
+    const differencePerGram =
+      salePricePerGram -
+      purchasePricePerGram;
+
+    const differenceTotal =
+      differencePerGram * totalGram;
+
+    const newSale = {
+      id: Date.now(),
+      type: "sale",
+      jenisLM,
+      gramasi,
+      jumlah,
+      hargaJualTotal: hargaTotal,
+      purchasePricePerGram,
+      costBasis,
+      differencePerGram,
+      differenceTotal,
+      tanggal:
+        new Date().toISOString(),
+    };
+
+    const updatedTransactions = [
+      newSale,
+      ...transactions,
+    ];
+
+    setTransactions(updatedTransactions);
+    saveGoldData(updatedTransactions);
+
+    setSaleForm({
+      jenisLM: "",
+      gramasi: "",
+      jumlah: 1,
+      hargaTotal: "",
+    });
+
+    setPage("history");
   };
 
   const handleSubmit = (e) => {
@@ -398,6 +622,31 @@ function App() {
 
           <button
             className={
+              page === "sale"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() => {
+              setEditingId(null);
+
+              const firstBrand =
+                brandSummary[0]?.brand || "";
+
+              setSaleForm({
+                jenisLM: firstBrand,
+                gramasi: "",
+                jumlah: 1,
+                hargaTotal: "",
+              });
+
+              setPage("sale");
+            }}
+          >
+            Penjualan
+          </button>
+
+          <button
+            className={
               page === "history"
                 ? "nav-button active"
                 : "nav-button"
@@ -480,6 +729,30 @@ function App() {
               setPage("dashboard");
             }}
             editingId={editingId}
+          />
+
+        ) : page === "sale" ? (
+
+          <Sale
+            form={saleForm}
+            ownedBrandOptions={ownedBrandOptions}
+            selectedSaleBrand={selectedSaleBrand}
+            availableSaleLots={availableSaleLots}
+            selectedSaleLot={selectedSaleLot}
+            handleChange={handleSaleChange}
+            handleSubmit={handleSubmitSale}
+            totalGramInput={saleTotalGram}
+            hargaPerGramInput={salePricePerGram}
+            purchasePricePerGram={salePurchasePricePerGram}
+            differencePerGram={saleDifferencePerGram}
+            differenceTotal={saleDifferenceTotal}
+            costBasis={saleCostBasis}
+            formatRupiah={formatRupiah}
+            formatNumber={formatNumber}
+            formatPriceInput={formatPriceInput}
+            onBack={() => {
+              setPage("dashboard");
+            }}
           />
 
         ) : (
@@ -781,10 +1054,20 @@ function Dashboard({
                           {item.jenisLM}
                         </strong>
 
-                        <span>
+                        <span className={
+                          item.type === "sale"
+                            ? "transaction-sale-label"
+                            : "transaction-buy-label"
+                        }>
+                          {item.type === "sale"
+                            ? "Penjualan"
+                            : "Pembelian"}
+                        </span>
+
+                        <small>
                           {item.gramasi} gram ×{" "}
                           {item.jumlah}
-                        </span>
+                        </small>
 
                         <small>
                           {formatDate(
@@ -798,7 +1081,9 @@ function Dashboard({
 
                         <strong>
                           {formatRupiah(
-                            item.hargaTotal
+                            item.type === "sale"
+                              ? item.hargaJualTotal
+                              : item.hargaTotal
                           )}
                         </strong>
 
@@ -1110,6 +1395,401 @@ function Purchase({
 }
 
 /* =========================
+   SALE
+========================= */
+
+function Sale({
+  form,
+  ownedBrandOptions,
+  selectedSaleBrand,
+  availableSaleLots,
+  selectedSaleLot,
+  handleChange,
+  handleSubmit,
+  totalGramInput,
+  hargaPerGramInput,
+  purchasePricePerGram,
+  differencePerGram,
+  differenceTotal,
+  costBasis,
+  formatRupiah,
+  formatNumber,
+  formatPriceInput,
+  onBack,
+}) {
+  const isPositive = differencePerGram >= 0;
+
+  return (
+    <section className="purchase-page">
+
+      <button
+        className="back-button"
+        onClick={onBack}
+      >
+        ← Kembali ke Dashboard
+      </button>
+
+      <div className="purchase-heading">
+
+        <p className="eyebrow">
+          TRANSAKSI PENJUALAN
+        </p>
+
+        <h1>
+          Jual Logam Mulia
+        </h1>
+
+        <p>
+          Harga beli rata-rata diambil otomatis
+          dari portofolio merk yang dipilih.
+        </p>
+
+      </div>
+
+      <div className="purchase-layout">
+
+        <div className="purchase-card">
+
+          <form onSubmit={handleSubmit}>
+
+            <div className="form-group">
+
+              <label>
+                Merk Logam Mulia
+              </label>
+
+              <select
+                name="jenisLM"
+                value={form.jenisLM}
+                onChange={handleChange}
+              >
+
+                <option value="">
+                  Pilih merk LM
+                </option>
+
+                {ownedBrandOptions.map((item) => (
+
+                  <option
+                    key={item.brand}
+                    value={item.brand}
+                  >
+                    {item.brand}
+                  </option>
+
+                ))}
+
+              </select>
+
+            </div>
+
+            {selectedSaleBrand && (
+
+              <div className="stock-info-box">
+
+                <span>
+                  Stok tersedia
+                </span>
+
+                <strong>
+                  {formatNumber(
+                    selectedSaleBrand.gram
+                  )} gram
+                </strong>
+
+                <small>
+                  {selectedSaleBrand.keping} keping
+                </small>
+
+              </div>
+
+            )}
+
+            <div className="form-row">
+
+              <div className="form-group">
+
+                <label>
+                  Gramasi
+                </label>
+
+                <select
+                  name="gramasi"
+                  value={form.gramasi}
+                  onChange={(e) => {
+                    handleChange(e);
+
+                    const selected =
+                      availableSaleLots.find(
+                        (item) =>
+                          Number(item.gramasi) ===
+                          Number(e.target.value)
+                      );
+
+                    if (selected) {
+                      const next =
+                        Number(form.jumlah) >
+                        selected.jumlah
+                          ? selected.jumlah
+                          : Number(form.jumlah) || 1;
+
+                      handleChange({
+                        target: {
+                          name: "jumlah",
+                          value: next,
+                        },
+                      });
+                    }
+                  }}
+                  disabled={
+                    !selectedSaleBrand ||
+                    availableSaleLots.length === 0
+                  }
+                >
+
+                  <option value="">
+                    Pilih gramasi
+                  </option>
+
+                  {availableSaleLots.map((item) => (
+
+                    <option
+                      key={item.gramasi}
+                      value={item.gramasi}
+                    >
+                      {item.gramasi} gram •{" "}
+                      {item.jumlah} keping tersedia
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </div>
+
+
+              <div className="form-group">
+
+                <label>
+                  Jumlah
+                </label>
+
+                <input
+                  type="number"
+                  name="jumlah"
+                  value={form.jumlah}
+                  onChange={handleChange}
+                  min="1"
+                  max={
+                    selectedSaleLot?.jumlah || 1
+                  }
+                  step="1"
+                  disabled={
+                    !selectedSaleLot
+                  }
+                />
+
+              </div>
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label>
+                Harga Penjualan
+              </label>
+
+              <div className="input-unit">
+
+                <span>
+                  Rp
+                </span>
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  name="hargaTotal"
+                  value={formatPriceInput(
+                    form.hargaTotal
+                  )}
+                  onChange={handleChange}
+                  placeholder="Contoh: 2.600.000"
+                />
+
+              </div>
+
+              <div className="input-hint">
+                Masukkan total harga yang kamu
+                terima dari penjualan.
+              </div>
+
+            </div>
+
+
+            <div className="calculation-box sale-calculation">
+
+              <div>
+                <span>
+                  Total emas dijual
+                </span>
+
+                <strong>
+                  {formatNumber(
+                    totalGramInput
+                  )}{" "}
+                  gram
+                </strong>
+              </div>
+
+
+              <div>
+                <span>
+                  Harga jual / gram
+                </span>
+
+                <strong>
+                  {formatRupiah(
+                    hargaPerGramInput
+                  )}
+                </strong>
+              </div>
+
+
+              <div className="sale-auto-price">
+                <span>
+                  Harga beli rata-rata
+                </span>
+
+                <strong>
+                  {formatRupiah(
+                    purchasePricePerGram
+                  )}
+                </strong>
+
+                <small>
+                  Otomatis dari Portofolio LM
+                </small>
+              </div>
+
+
+              <div
+                className={
+                  isPositive
+                    ? "sale-difference positive"
+                    : "sale-difference negative"
+                }
+              >
+                <span>
+                  Selisih harga / gram
+                </span>
+
+                <strong>
+                  {isPositive ? "+" : "-"}
+                  {formatRupiah(
+                    Math.abs(differencePerGram)
+                  )}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>
+                  Modal yang dilepas
+                </span>
+
+                <strong>
+                  {formatRupiah(
+                    costBasis
+                  )}
+                </strong>
+              </div>
+
+
+              <div
+                className={
+                  differenceTotal >= 0
+                    ? "sale-profit positive"
+                    : "sale-profit negative"
+                }
+              >
+                <span>
+                  {differenceTotal >= 0
+                    ? "Keuntungan"
+                    : "Kerugian"}
+                </span>
+
+                <strong>
+                  {differenceTotal >= 0
+                    ? "+"
+                    : "-"}
+                  {formatRupiah(
+                    Math.abs(differenceTotal)
+                  )}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <button
+              type="submit"
+              className="save-button"
+              disabled={
+                !selectedSaleBrand ||
+                !selectedSaleLot ||
+                totalGramInput <= 0 ||
+                Number(form.hargaTotal) <= 0
+              }
+            >
+              Simpan Penjualan
+            </button>
+
+          </form>
+
+        </div>
+
+
+        <aside className="purchase-info">
+
+          <div className="info-icon">
+            Au
+          </div>
+
+          <h2>
+            Harga beli dihitung otomatis.
+          </h2>
+
+          <p>
+            Sistem mengambil harga rata-rata
+            pembelian dari merk LM yang dipilih
+            pada Portofolio Dashboard. Selisih
+            dibandingkan dengan harga jual
+            ditampilkan sebagai keuntungan
+            atau kerugian.
+          </p>
+
+          <div className="formula">
+
+            <span>
+              Rumus selisih
+            </span>
+
+            <strong>
+              Harga Jual / Gram − Harga Beli / Gram
+            </strong>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </section>
+  );
+}
+
+/* =========================
    TRANSACTION HISTORY
 ========================= */
 
@@ -1206,11 +1886,17 @@ function TransactionHistory({
                 Number(item.gramasi) *
                 Number(item.jumlah);
 
+              const hargaTotalDisplay =
+                item.type === "sale"
+                  ? Number(item.hargaJualTotal || 0)
+                  : Number(item.hargaTotal || 0);
+
               const hargaPerGram =
-                gram > 0
-                  ? Number(item.hargaTotal) /
-                    gram
-                  : 0;
+                item.type === "sale"
+                  ? Number(item.purchasePricePerGram || 0)
+                  : gram > 0
+                    ? hargaTotalDisplay / gram
+                    : 0;
 
               return (
 
@@ -1235,10 +1921,22 @@ function TransactionHistory({
                         {item.jenisLM}
                       </strong>
 
-                      <span>
+                      <span
+                        className={
+                          item.type === "sale"
+                            ? "history-sale-tag"
+                            : "history-buy-tag"
+                        }
+                      >
+                        {item.type === "sale"
+                          ? "Penjualan"
+                          : "Pembelian"}
+                      </span>
+
+                      <small>
                         {item.gramasi} gram ×{" "}
                         {item.jumlah} keping
-                      </span>
+                      </small>
 
                       <small>
                         {formatDate(
@@ -1265,7 +1963,7 @@ function TransactionHistory({
 
                       <strong>
                         {formatRupiah(
-                          item.hargaTotal
+                          hargaTotalDisplay
                         )}
                       </strong>
                     </div>
@@ -1280,19 +1978,50 @@ function TransactionHistory({
                       </strong>
                     </div>
 
+                    {item.type === "sale" && (
+                      <div
+                        className={
+                          Number(item.differenceTotal || 0) >= 0
+                            ? "history-profit positive"
+                            : "history-profit negative"
+                        }
+                      >
+                        <span>
+                          {Number(item.differenceTotal || 0) >= 0
+                            ? "Keuntungan"
+                            : "Kerugian"}
+                        </span>
+
+                        <strong>
+                          {Number(item.differenceTotal || 0) >= 0
+                            ? "+"
+                            : "-"}
+                          {formatRupiah(
+                            Math.abs(
+                              Number(
+                                item.differenceTotal || 0
+                              )
+                            )
+                          )}
+                        </strong>
+                      </div>
+                    )}
+
                   </div>
 
                   <div className="history-actions">
 
-                    <button
-                      type="button"
-                      className="edit-button"
-                      onClick={() =>
-                        handleEdit(item)
-                      }
-                    >
-                      Edit
-                    </button>
+                    {item.type !== "sale" && (
+                      <button
+                        type="button"
+                        className="edit-button"
+                        onClick={() =>
+                          handleEdit(item)
+                        }
+                      >
+                        Edit
+                      </button>
+                    )}
 
                     <button
                       type="button"
