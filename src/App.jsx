@@ -310,7 +310,7 @@ function App() {
 
     if (name === "hargaTotal") {
       const cleanValue =
-        value.replace(/\D/g, "");
+       hargaTotal: value.replace(/\D/g, ""),
 
       setForm((prev) => ({
         ...prev,
