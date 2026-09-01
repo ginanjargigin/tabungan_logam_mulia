@@ -325,24 +325,7 @@ function App() {
   }));
 };
 
-  const handleSaleChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === "hargaTotal") {
-      setSaleForm((prev) => ({
-        ...prev,
-        hargaTotal: value.replace(/\\D/g, ""),
-      }));
-
-      return;
-    }
-
-    setSaleForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
+  
   const handleSubmitSale = (e) => {
     e.preventDefault();
 
