@@ -305,13 +305,15 @@ function App() {
     saleDifferencePerGram *
     saleTotalGram;
 
-  const handleSaleChange = (e) => {
+ const handleSaleChange = (e) => {
   const { name, value } = e.target;
 
   if (name === "hargaTotal") {
+    const cleanValue = value.replace(/\D/g, "");
+
     setSaleForm((prev) => ({
       ...prev,
-      hargaTotal: value.replace(/\D/g, ""),
+      hargaTotal: cleanValue,
     }));
 
     return;
