@@ -305,26 +305,23 @@ function App() {
     saleDifferencePerGram *
     saleTotalGram;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleSaleChange = (e) => {
+  const { name, value } = e.target;
 
-    if (name === "hargaTotal") {
-      const cleanValue =
-       hargaTotal: value.replace(/\D/g, ""),
-
-      setForm((prev) => ({
-        ...prev,
-        hargaTotal: cleanValue,
-      }));
-
-      return;
-    }
-
-    setForm((prev) => ({
+  if (name === "hargaTotal") {
+    setSaleForm((prev) => ({
       ...prev,
-      [name]: value,
+      hargaTotal: value.replace(/\D/g, ""),
     }));
-  };
+
+    return;
+  }
+
+  setSaleForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   const handleSaleChange = (e) => {
     const { name, value } = e.target;
