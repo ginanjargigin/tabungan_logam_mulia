@@ -71,6 +71,16 @@ function App() {
     hargaTotal: "",
   });
 
+  const todayString = new Date().toISOString().slice(0, 10);
+  const last30DaysString = new Date(
+    Date.now() - 29 * 24 * 60 * 60 * 1000
+  ).toISOString().slice(0, 10);
+
+  const [profitPeriod, setProfitPeriod] = useState({
+    start: last30DaysString,
+    end: todayString,
+  });
+
   const formatRupiah = (number) =>
     new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -305,27 +315,122 @@ function App() {
     saleDifferencePerGram *
     saleTotalGram;
 
- const handleSaleChange = (e) => {
-  const { name, value } = e.target;
+  const profitReport = useMemo(() => {
+    const start = profitPeriod.start
+      ? new Date(`${profitPeriod.start}T00:00:00`)
+      : null;
 
-  if (name === "hargaTotal") {
-    const cleanValue = value.replace(/\D/g, "");
+    const end = profitPeriod.end
+      ? new Date(`${profitPeriod.end}T23:59:59`)
+      : null;
+
+    const sales = transactions.filter((item) => {
+      if (item.type !== "sale" || !item.tanggal) {
+        return false;
+      }
+
+      const saleDate = new Date(item.tanggal);
+
+      if (Number.isNaN(saleDate.getTime())) {
+        return false;
+      }
+
+      if (start && saleDate < start) return false;
+      if (end && saleDate > end) return false;
+
+      return true;
+    });
+
+    const totalSales = sales.reduce(
+      (total, item) =>
+        total + Number(
+          item.hargaJualTotal ??
+          item.hargaTotal ??
+          0
+        ),
+      0
+    );
+
+    const totalCost = sales.reduce(
+      (total, item) =>
+        total + Number(item.costBasis || 0),
+      0
+    );
+
+    const totalProfit = sales.reduce(
+      (total, item) => {
+        const difference =
+          item.differenceTotal ??
+          (
+            Number(
+              item.hargaJualTotal ??
+              item.hargaTotal ??
+              0
+            ) -
+            Number(item.costBasis || 0)
+          );
+
+        return total + Number(difference || 0);
+      },
+      0
+    );
+
+    const totalGramSold = sales.reduce(
+      (total, item) =>
+        total +
+        Number(item.gramasi || 0) *
+        Number(item.jumlah || 0),
+      0
+    );
+
+    return {
+      sales,
+      totalSales,
+      totalCost,
+      totalProfit,
+      totalGramSold,
+    };
+  }, [transactions, profitPeriod]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "hargaTotal") {
+      const cleanValue =
+        value.replace(/\D/g, "");
+
+      setForm((prev) => ({
+        ...prev,
+        hargaTotal: cleanValue,
+      }));
+
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "hargaTotal") {
+      setSaleForm((prev) => ({
+        ...prev,
+        hargaTotal: value.replace(/\\D/g, ""),
+      }));
+
+      return;
+    }
 
     setSaleForm((prev) => ({
       ...prev,
-      hargaTotal: cleanValue,
+      [name]: value,
     }));
+  };
 
-    return;
-  }
-
-  setSaleForm((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-
-  
   const handleSubmitSale = (e) => {
     e.preventDefault();
 
@@ -640,6 +745,19 @@ function App() {
             Riwayat
           </button>
 
+          <button
+            className={
+              page === "profit"
+                ? "nav-button active"
+                : "nav-button"
+            }
+            onClick={() =>
+              setPage("profit")
+            }
+          >
+            Laba/Rugi
+          </button>
+
         </nav>
 
         <div className="nav-actions">
@@ -735,6 +853,18 @@ function App() {
             onBack={() => {
               setPage("dashboard");
             }}
+          />
+
+        ) : page === "profit" ? (
+
+          <ProfitReport
+            profitPeriod={profitPeriod}
+            setProfitPeriod={setProfitPeriod}
+            report={profitReport}
+            formatRupiah={formatRupiah}
+            formatNumber={formatNumber}
+            formatDate={formatDate}
+            onBack={() => setPage("dashboard")}
           />
 
         ) : (
@@ -1764,6 +1894,365 @@ function Sale({
           </div>
 
         </aside>
+
+      </div>
+
+    </section>
+  );
+}
+
+/* =========================
+   PROFIT REPORT
+========================= */
+
+function ProfitReport({
+  profitPeriod,
+  setProfitPeriod,
+  report,
+  formatRupiah,
+  formatNumber,
+  formatDate,
+  onBack,
+}) {
+  const isProfit = report.totalProfit >= 0;
+
+  const handlePeriodChange = (e) => {
+    const { name, value } = e.target;
+
+    setProfitPeriod((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <section className="profit-page">
+
+      <button
+        className="back-button"
+        onClick={onBack}
+      >
+        ← Kembali ke Dashboard
+      </button>
+
+      <div className="profit-heading">
+
+        <div>
+          <p className="eyebrow">
+            LAPORAN PENJUALAN
+          </p>
+
+          <h1>
+            Laba / Rugi
+          </h1>
+
+          <p>
+            Hitung hasil penjualan berdasarkan
+            periode yang kamu pilih.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div className="profit-filter">
+
+        <div className="profit-filter-title">
+          <div>
+            <h2>
+              Periode Perhitungan
+            </h2>
+
+            <p>
+              Default: 30 hari terakhir
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="period-reset"
+            onClick={() => {
+              const today =
+                new Date()
+                  .toISOString()
+                  .slice(0, 10);
+
+              const start =
+                new Date(
+                  Date.now() -
+                  29 * 24 * 60 * 60 * 1000
+                )
+                  .toISOString()
+                  .slice(0, 10);
+
+              setProfitPeriod({
+                start,
+                end: today,
+              });
+            }}
+          >
+            30 Hari
+          </button>
+        </div>
+
+
+        <div className="profit-date-row">
+
+          <div className="form-group">
+
+            <label>
+              Tanggal Mulai
+            </label>
+
+            <input
+              type="date"
+              name="start"
+              value={profitPeriod.start}
+              onChange={handlePeriodChange}
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label>
+              Tanggal Akhir
+            </label>
+
+            <input
+              type="date"
+              name="end"
+              value={profitPeriod.end}
+              onChange={handlePeriodChange}
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <section className="profit-stats">
+
+        <div className="profit-stat">
+
+          <span>
+            Total Penjualan
+          </span>
+
+          <strong>
+            {formatRupiah(
+              report.totalSales
+            )}
+          </strong>
+
+          <small>
+            Uang hasil penjualan
+          </small>
+
+        </div>
+
+
+        <div className="profit-stat">
+
+          <span>
+            Modal Terjual
+          </span>
+
+          <strong>
+            {formatRupiah(
+              report.totalCost
+            )}
+          </strong>
+
+          <small>
+            Modal yang dilepas
+          </small>
+
+        </div>
+
+
+        <div
+          className={
+            isProfit
+              ? "profit-stat result-positive"
+              : "profit-stat result-negative"
+          }
+        >
+
+          <span>
+            {isProfit
+              ? "Laba Bersih"
+              : "Rugi"}
+          </span>
+
+          <strong>
+            {isProfit ? "+" : "-"}
+            {formatRupiah(
+              Math.abs(report.totalProfit)
+            )}
+          </strong>
+
+          <small>
+            {formatNumber(
+              report.totalGramSold
+            )}{" "}
+            gram terjual
+          </small>
+
+        </div>
+
+      </section>
+
+
+      <div className="profit-card">
+
+        <div className="profit-card-header">
+
+          <div>
+            <h2>
+              Detail Penjualan
+            </h2>
+
+            <p>
+              {report.sales.length} transaksi dalam periode
+            </p>
+          </div>
+
+          <span className="count-badge">
+            {report.sales.length}
+          </span>
+
+        </div>
+
+
+        {report.sales.length === 0 ? (
+
+          <div className="empty-small">
+            Tidak ada transaksi penjualan
+            pada periode ini.
+          </div>
+
+        ) : (
+
+          <div className="profit-list">
+
+            {report.sales.map((item) => {
+
+              const difference =
+                Number(
+                  item.differenceTotal ??
+                  (
+                    Number(
+                      item.hargaJualTotal ??
+                      item.hargaTotal ??
+                      0
+                    ) -
+                    Number(item.costBasis || 0)
+                  )
+                );
+
+              const totalGram =
+                Number(item.gramasi || 0) *
+                Number(item.jumlah || 0);
+
+              return (
+
+                <div
+                  className="profit-row"
+                  key={item.id}
+                >
+
+                  <div className="profit-main">
+
+                    <div className="gold-circle">
+                      Au
+                    </div>
+
+                    <div>
+                      <strong>
+                        {item.jenisLM}
+                      </strong>
+
+                      <span>
+                        {formatNumber(totalGram)} gram
+                      </span>
+
+                      <small>
+                        {formatDate(item.tanggal)}
+                      </small>
+                    </div>
+
+                  </div>
+
+
+                  <div className="profit-row-value">
+
+                    <span>
+                      Penjualan
+                    </span>
+
+                    <strong>
+                      {formatRupiah(
+                        item.hargaJualTotal ??
+                        item.hargaTotal ??
+                        0
+                      )}
+                    </strong>
+
+                  </div>
+
+
+                  <div className="profit-row-value">
+
+                    <span>
+                      Modal
+                    </span>
+
+                    <strong>
+                      {formatRupiah(
+                        item.costBasis || 0
+                      )}
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    className={
+                      difference >= 0
+                        ? "profit-row-result positive"
+                        : "profit-row-result negative"
+                    }
+                  >
+
+                    <span>
+                      {difference >= 0
+                        ? "Laba"
+                        : "Rugi"}
+                    </span>
+
+                    <strong>
+                      {difference >= 0
+                        ? "+"
+                        : "-"}
+                      {formatRupiah(
+                        Math.abs(difference)
+                      )}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              );
+            })}
+
+          </div>
+
+        )}
 
       </div>
 
