@@ -71,7 +71,7 @@ button {
    NAVBAR
 ========================= */
 
-.navbar {
+.topbar {
   height: 76px;
   padding: 0 5%;
   background: var(--panel);
@@ -156,6 +156,7 @@ button {
 
 .theme-select {
   width: 120px;
+  min-width: 120px;
   height: 34px;
   padding: 0 10px;
 
@@ -886,7 +887,7 @@ footer {
 ========================= */
 
 @media (max-width: 850px) {
-  .navbar {
+  .topbar {
     height: auto;
     min-height: 70px;
 
