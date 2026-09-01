@@ -1401,3 +1401,159 @@ footer {
   }
 
 }
+
+/* =========================
+   SALE PAGE
+========================= */
+
+.stock-info-box {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+
+  margin: -4px 0 18px;
+  padding: 12px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--soft);
+}
+
+.stock-info-box span {
+  color: var(--text-soft);
+  font-size: 9px;
+}
+
+.stock-info-box strong {
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.stock-info-box small {
+  color: var(--text-soft);
+  font-size: 9px;
+}
+
+.sale-calculation {
+  grid-template-columns: 1fr 1fr;
+}
+
+.sale-auto-price small {
+  display: block;
+  margin-top: 4px;
+
+  color: var(--text-soft);
+  font-size: 8px;
+}
+
+.sale-difference,
+.sale-profit {
+  border-radius: 9px;
+  padding: 9px 10px;
+}
+
+.sale-difference.positive,
+.sale-profit.positive {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.sale-difference.negative,
+.sale-profit.negative {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.sale-difference.positive span,
+.sale-difference.negative span,
+.sale-profit.positive span,
+.sale-profit.negative span {
+  color: inherit;
+}
+
+.sale-difference.positive strong,
+.sale-profit.positive strong {
+  color: #15803d;
+}
+
+.sale-difference.negative strong,
+.sale-profit.negative strong {
+  color: #dc2626;
+}
+
+.save-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* =========================
+   TRANSACTION TYPE
+========================= */
+
+.transaction-sale-label,
+.history-sale-tag {
+  color: #dc2626 !important;
+  font-weight: 700;
+}
+
+.transaction-buy-label,
+.history-buy-tag {
+  color: var(--primary) !important;
+  font-weight: 700;
+}
+
+.recent-info .transaction-sale-label,
+.recent-info .transaction-buy-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 8px;
+}
+
+.history-main .history-sale-tag,
+.history-main .history-buy-tag {
+  display: block;
+  margin-top: 5px;
+  font-size: 9px;
+}
+
+.history-profit {
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.history-profit.positive span,
+.history-profit.positive strong {
+  color: #15803d;
+}
+
+.history-profit.negative span,
+.history-profit.negative strong {
+  color: #dc2626;
+}
+
+.history-profit.positive {
+  background: #ecfdf3;
+}
+
+.history-profit.negative {
+  background: #fef2f2;
+}
+
+
+@media (max-width: 550px) {
+  .stock-info-box {
+    grid-template-columns: 1fr auto;
+  }
+
+  .stock-info-box small {
+    grid-column: 1 / -1;
+  }
+
+  .sale-calculation {
+    grid-template-columns: 1fr;
+  }
+}
