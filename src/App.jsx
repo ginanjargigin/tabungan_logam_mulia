@@ -323,11 +323,6 @@ const saleDifferencePerGram =
     ? saleDifferenceTotal / saleTotalGram
     : 0;
 
-const saleDifferencePerGram =
-  saleTotalGram > 0
-    ? saleDifferenceTotal / saleTotalGram
-    : 0;
-
   const profitReport = useMemo(() => {
     const start = profitPeriod.start
       ? new Date(`${profitPeriod.start}T00:00:00`)
