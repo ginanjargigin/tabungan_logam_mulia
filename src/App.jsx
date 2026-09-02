@@ -286,34 +286,47 @@ function App() {
         Number(saleForm.gramasi)
     ) || null;
 
-  const saleTotalGram =
-    (Number(saleForm.gramasi) || 0) *
-    (Number(saleForm.jumlah) || 0);
+ const saleTotalGram =
+  (Number(saleForm.gramasi) || 0) *
+  (Number(saleForm.jumlah) || 0);
 
-  // Harga beli otomatis berasal dari rata-rata
-  // merk tersebut yang tampil pada Portofolio LM.
-  const salePurchasePricePerGram =
-    selectedSaleBrand?.rataRata || 0;
+// Harga beli rata-rata per gram berdasarkan
+// merk yang dipilih pada portofolio.
+const salePurchasePricePerGram =
+  selectedSaleBrand?.rataRata || 0;
 
-  const salePricePerGram =
-    saleTotalGram > 0
-      ? (Number(saleForm.hargaTotal) || 0) /
-        saleTotalGram
-      : 0;
+// Total uang yang diterima dari penjualan.
+const saleTotalPrice =
+  Number(saleForm.hargaTotal) || 0;
 
-  const saleCostBasis =
-    salePurchasePricePerGram *
-    saleTotalGram;
+// Harga jual per gram.
+const salePricePerGram =
+  saleTotalGram > 0
+    ? saleTotalPrice / saleTotalGram
+    : 0;
 
-  // Positif = harga jual lebih tinggi.
-  // Negatif = harga jual lebih rendah.
-  const saleDifferencePerGram =
-    salePricePerGram -
-    salePurchasePricePerGram;
+// Modal dari emas yang dijual.
+const saleCostBasis =
+  salePurchasePricePerGram *
+  saleTotalGram;
 
-  const saleDifferenceTotal =
-    saleDifferencePerGram *
-    saleTotalGram;
+// Laba / rugi total.
+// Positif = laba.
+// Negatif = rugi.
+const saleDifferenceTotal =
+  saleTotalPrice -
+  saleCostBasis;
+
+// Laba / rugi per gram.
+const saleDifferencePerGram =
+  saleTotalGram > 0
+    ? saleDifferenceTotal / saleTotalGram
+    : 0;
+
+const saleDifferencePerGram =
+  saleTotalGram > 0
+    ? saleDifferenceTotal / saleTotalGram
+    : 0;
 
   const profitReport = useMemo(() => {
     const start = profitPeriod.start
@@ -414,22 +427,24 @@ function App() {
   };
 
   const handleSaleChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    if (name === "hargaTotal") {
-      setSaleForm((prev) => ({
-        ...prev,
-        hargaTotal: value.replace(/\\D/g, ""),
-      }));
-
-      return;
-    }
+  if (name === "hargaTotal") {
+    const cleanValue = value.replace(/\D/g, "");
 
     setSaleForm((prev) => ({
       ...prev,
-      [name]: value,
+      hargaTotal: cleanValue,
     }));
-  };
+
+    return;
+  }
+
+  setSaleForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   const handleSubmitSale = (e) => {
     e.preventDefault();
