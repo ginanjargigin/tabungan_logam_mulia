@@ -1,6 +1,8 @@
 const STORAGE_KEY = "gold-save-data";
 
-const BIN_ID = import.meta.env.VITE_JSONBIN_BIN_ID;
+const BIN_ID =
+  import.meta.env.VITE_JSONBIN_BIN_ID;
+
 const ACCESS_KEY =
   import.meta.env.VITE_JSONBIN_ACCESS_KEY;
 
@@ -10,15 +12,14 @@ const JSONBIN_URL =
 const JSONBIN_LATEST_URL =
   `${JSONBIN_URL}/latest`;
 
-// ================================
+// ========================================
 // LOCAL STORAGE
-// ================================
+// ========================================
 
 export function loadGoldData() {
   try {
-    const data = localStorage.getItem(
-      STORAGE_KEY
-    );
+    const data =
+      localStorage.getItem(STORAGE_KEY);
 
     if (!data) {
       return [];
@@ -35,9 +36,9 @@ export function loadGoldData() {
   }
 }
 
-// ================================
-// JSONBIN - READ
-// ================================
+// ========================================
+// JSONBIN - LOAD DATA
+// ========================================
 
 export async function loadGoldDataFromCloud() {
   if (!BIN_ID || !ACCESS_KEY) {
@@ -78,12 +79,13 @@ export async function loadGoldDataFromCloud() {
   }
 }
 
-// ================================
-// JSONBIN - UPDATE
-// ================================
+// ========================================
+// JSONBIN - SAVE DATA
+// ========================================
 
 export async function saveGoldDataToCloud(
-  data
+  transactions,
+  brands = null
 ) {
   if (!BIN_ID || !ACCESS_KEY) {
     console.warn(
@@ -94,6 +96,43 @@ export async function saveGoldDataToCloud(
   }
 
   try {
+    let currentRecord = null;
+
+    // Ambil data yang sudah ada terlebih dahulu
+    // supaya brands tidak terhapus.
+    try {
+      const response = await fetch(
+        JSONBIN_LATEST_URL,
+        {
+          method: "GET",
+          headers: {
+            "X-Access-Key": ACCESS_KEY,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result =
+          await response.json();
+
+        currentRecord =
+          result.record || null;
+      }
+    } catch (error) {
+      console.warn(
+        "Tidak dapat membaca data lama JSONBin:",
+        error
+      );
+    }
+
+    const updatedRecord = {
+      transactions,
+      brands:
+        brands ??
+        currentRecord?.brands ??
+        [],
+    };
+
     const response = await fetch(
       JSONBIN_URL,
       {
@@ -102,10 +141,9 @@ export async function saveGoldDataToCloud(
           "Content-Type": "application/json",
           "X-Access-Key": ACCESS_KEY,
         },
-        body: JSON.stringify({
-          transactions: data,
-          brands: [],
-        }),
+        body: JSON.stringify(
+          updatedRecord
+        ),
       }
     );
 
@@ -126,22 +164,29 @@ export async function saveGoldDataToCloud(
   }
 }
 
-// ================================
+// ========================================
 // SAVE LOCAL + CLOUD
-// ================================
+// ========================================
 
-export function saveGoldData(data) {
+export function saveGoldData(
+  transactions,
+  brands = null
+) {
   try {
+    // Backup lokal
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify(data)
+      JSON.stringify(transactions)
     );
 
-    // Simpan ke JSONBin secara asynchronous.
-    saveGoldDataToCloud(data);
+    // Simpan cloud
+    saveGoldDataToCloud(
+      transactions,
+      brands
+    );
   } catch (error) {
     console.error(
-      "Gagal menyimpan data lokal:",
+      "Gagal menyimpan data:",
       error
     );
   }
