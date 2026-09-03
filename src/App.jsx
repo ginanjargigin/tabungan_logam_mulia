@@ -1,6 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import "./App.css";
-import { loadGoldData, saveGoldData } from "./storage";
+import {
+  loadGoldData,
+  loadGoldDataFromCloud,
+  saveGoldData,
+} from "./storage";
 
 const DEFAULT_BRANDS = [
   "Antam",
@@ -41,8 +49,60 @@ function saveBrands(brands) {
 }
 
 function App() {
-  const [transactions, setTransactions] =
-    useState(loadGoldData);
+ const [transactions, setTransactions] =
+  useState([]);
+
+  useEffect(() => {
+  let mounted = true;
+
+  const initializeData = async () => {
+    const cloudData =
+      await loadGoldDataFromCloud();
+
+    if (!mounted) return;
+
+    // Jika JSONBin memiliki data,
+    // gunakan data dari cloud.
+    if (
+      cloudData &&
+      Array.isArray(
+        cloudData.transactions
+      )
+    ) {
+      setTransactions(
+        cloudData.transactions
+      );
+
+      // Simpan juga sebagai backup lokal.
+      localStorage.setItem(
+        "gold-save-data",
+        JSON.stringify(
+          cloudData.transactions
+        )
+      );
+
+      return;
+    }
+
+    // Jika cloud belum memiliki data,
+    // gunakan data lama dari localStorage.
+    const localData =
+      loadGoldData();
+
+    if (localData.length > 0) {
+      setTransactions(localData);
+
+      // Migrasikan data lama ke JSONBin.
+      saveGoldData(localData);
+    }
+  };
+
+  initializeData();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
 
   const [brands, setBrands] =
     useState(loadBrands);
