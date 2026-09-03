@@ -1,12 +1,31 @@
 export default async function handler() {
+  const started = Date.now();
+
   const BIN_ID = process.env.JSONBIN_BIN_ID;
   const ACCESS_KEY = process.env.JSONBIN_ACCESS_KEY;
 
-  if (!BIN_ID || !ACCESS_KEY) {
+  if (!BIN_ID) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: "Environment variable JSONBin belum tersedia",
+        step: "environment",
+        message: "JSONBIN_BIN_ID tidak tersedia",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
+  if (!ACCESS_KEY) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        step: "environment",
+        message: "JSONBIN_ACCESS_KEY tidak tersedia",
       }),
       {
         status: 500,
@@ -25,36 +44,19 @@ export default async function handler() {
         headers: {
           "X-Access-Key": ACCESS_KEY,
         },
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       }
     );
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          message: "Gagal membaca JSONBin",
-          status: response.status,
-        }),
-        {
-          status: response.status,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
+    const text = await response.text();
 
     return new Response(
       JSON.stringify({
-        success: true,
-        message: "Vercel berhasil terhubung ke JSONBin",
-        hasData: !!result.record,
-        dataKeys: result.record
-          ? Object.keys(result.record)
-          : [],
+        success: response.ok,
+        step: "jsonbin",
+        status: response.status,
+        response: text.substring(0, 500),
+        durationMs: Date.now() - started,
       }),
       {
         status: 200,
@@ -64,15 +66,16 @@ export default async function handler() {
       }
     );
   } catch (error) {
-    console.error("JSONBin error:", error);
-
     return new Response(
       JSON.stringify({
         success: false,
-        message: "Tidak dapat terhubung ke JSONBin",
+        step: "jsonbin",
+        errorName: error?.name || "UnknownError",
+        errorMessage: error?.message || "Unknown error",
+        durationMs: Date.now() - started,
       }),
       {
-        status: 500,
+        status: 200,
         headers: {
           "Content-Type": "application/json",
         },
