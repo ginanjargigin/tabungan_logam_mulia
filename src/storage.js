@@ -12,11 +12,63 @@ const JSONBIN_URL =
 const JSONBIN_LATEST_URL =
   `${JSONBIN_URL}/latest`;
 
-// ========================================
-// LOCAL STORAGE
-// ========================================
+const MODE_KEY = "gold-save-mode";
+
+const DEMO_TRANSACTIONS = [
+  {
+    id: 1001,
+    type: "buy",
+    jenisLM: "Antam",
+    gramasi: 10,
+    jumlah: 2,
+    hargaTotal: 47000000,
+    tanggal: "2026-08-01T09:00:00.000Z",
+  },
+  {
+    id: 1002,
+    type: "buy",
+    jenisLM: "UBS",
+    gramasi: 5,
+    jumlah: 2,
+    hargaTotal: 23200000,
+    tanggal: "2026-08-05T09:00:00.000Z",
+  },
+  {
+    id: 1003,
+    type: "buy",
+    jenisLM: "Hartadinata",
+    gramasi: 2,
+    jumlah: 4,
+    hargaTotal: 9400000,
+    tanggal: "2026-08-10T09:00:00.000Z",
+  },
+  {
+    id: 1004,
+    type: "sale",
+    jenisLM: "Antam",
+    gramasi: 5,
+    jumlah: 1,
+    hargaJualTotal: 11500000,
+    purchasePricePerGram: 2350000,
+    costBasis: 11750000,
+    differencePerGram: -50000,
+    differenceTotal: -250000,
+    tanggal: "2026-08-20T09:00:00.000Z",
+  },
+];
+
+function isGuestMode() {
+  return (
+    sessionStorage.getItem(MODE_KEY) === "guest"
+  );
+}
 
 export function loadGoldData() {
+  // Guest tidak boleh membaca data pribadi
+  if (isGuestMode()) {
+    return DEMO_TRANSACTIONS;
+  }
+
   try {
     const data =
       localStorage.getItem(STORAGE_KEY);
@@ -36,11 +88,12 @@ export function loadGoldData() {
   }
 }
 
-// ========================================
-// JSONBIN - LOAD DATA
-// ========================================
-
 export async function loadGoldDataFromCloud() {
+  // Guest TIDAK BOLEH mengakses cloud
+  if (isGuestMode()) {
+    return null;
+  }
+
   if (!BIN_ID || !ACCESS_KEY) {
     console.warn(
       "JSONBin belum dikonfigurasi."
@@ -66,7 +119,8 @@ export async function loadGoldDataFromCloud() {
       );
     }
 
-    const result = await response.json();
+    const result =
+      await response.json();
 
     return result.record || null;
   } catch (error) {
@@ -79,14 +133,15 @@ export async function loadGoldDataFromCloud() {
   }
 }
 
-// ========================================
-// JSONBIN - SAVE DATA
-// ========================================
-
 export async function saveGoldDataToCloud(
   transactions,
   brands = null
 ) {
+  // Guest TIDAK BOLEH menulis ke cloud
+  if (isGuestMode()) {
+    return false;
+  }
+
   if (!BIN_ID || !ACCESS_KEY) {
     console.warn(
       "JSONBin belum dikonfigurasi."
@@ -98,8 +153,6 @@ export async function saveGoldDataToCloud(
   try {
     let currentRecord = null;
 
-    // Ambil data yang sudah ada terlebih dahulu
-    // supaya brands tidak terhapus.
     try {
       const response = await fetch(
         JSONBIN_LATEST_URL,
@@ -164,22 +217,22 @@ export async function saveGoldDataToCloud(
   }
 }
 
-// ========================================
-// SAVE LOCAL + CLOUD
-// ========================================
-
 export function saveGoldData(
   transactions,
   brands = null
 ) {
+  // Guest tidak menyimpan data transaksi
+  // ke localStorage maupun JSONBin.
+  if (isGuestMode()) {
+    return;
+  }
+
   try {
-    // Backup lokal
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(transactions)
     );
 
-    // Simpan cloud
     saveGoldDataToCloud(
       transactions,
       brands
