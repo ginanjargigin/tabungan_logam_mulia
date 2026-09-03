@@ -1,6 +1,14 @@
-export default function handler(request, response) {
-  response.status(200).json({
-    success: true,
-    message: "Gold Save API berhasil berjalan",
-  });
+export default async function handler() {
+  return new Response(
+    JSON.stringify({
+      success: true,
+      message: "Gold Save API berhasil berjalan",
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 }
