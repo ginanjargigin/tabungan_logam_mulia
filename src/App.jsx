@@ -847,37 +847,51 @@ const saleDifferencePerGram =
 
         </nav>
 
-      <div className="nav-actions">
+             </nav>
 
-      {page === "dashboard" && (
-        <select
-          className="theme-select"
-          id="nav-dashboard-theme"
-          value={theme}
-          onChange={(e) => setTheme(e.target.value)}
-          aria-label="Pilih tema dashboard"
-        >
-          <option value="emerald">Emerald</option>
-          <option value="dark-gold">Dark Gold</option>
-          <option value="midnight">Midnight</option>
-        </select>
-      )}
+        <div className="nav-actions">
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              style={{
-                padding: "9px 14px",
-                border: "1px solid #d1d5db",
-                borderRadius: "8px",
-                background: "#ffffff",
-                color: "#374151",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
+          {page === "dashboard" && (
+            <select
+              className="theme-select"
+              id="nav-dashboard-theme"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              aria-label="Pilih tema dashboard"
             >
-              Logout
-            </button>
+              <option value="emerald">
+                Emerald
+              </option>
+
+              <option value="dark-gold">
+                Dark Gold
+              </option>
+
+              <option value="midnight">
+                Midnight
+              </option>
+            </select>
+          )}
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              padding: "9px 14px",
+              border: "1px solid #d1d5db",
+              borderRadius: "8px",
+              background: "#ffffff",
+              color: "#374151",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            Logout
+          </button>
+
+        </div>
+
+      </header>
           
           </div>
           {page === "dashboard" && (
