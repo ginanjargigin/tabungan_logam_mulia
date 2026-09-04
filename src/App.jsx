@@ -53,7 +53,7 @@ function saveBrands(brands) {
     sessionStorage.getItem("gold-save-mode") === "guest";
 
   const handleLogout = async () => {
-  const handleLogout = async () => {
+ 
     try {
       await fetch("/api/auth", {
         method: "DELETE",
