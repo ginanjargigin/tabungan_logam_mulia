@@ -746,150 +746,164 @@ const saleDifferencePerGram =
     <div
       className={`app theme-${theme}`}
     >
-      <header className="topbar">
+     <header className="topbar">
 
-        <div className="brand">
-          <div className="logo">
-            GOLD<span>SAVE</span>
-          </div>
+  <div className="brand">
+    <div className="logo">
+      GOLD<span>SAVE</span>
+    </div>
 
-          <p className="subtitle">
-            Personal Gold Savings
-          </p>
-        </div>
+    <p className="subtitle">
+      Personal Gold Savings
+    </p>
+  </div>
 
-        <nav className="nav-menu">
 
-          <button
-            className={
-              page === "dashboard"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() =>
-              setPage("dashboard")
-            }
-          >
-            Dashboard
-          </button>
+  <nav className="nav-menu">
 
-          <button
-            className={
-              page === "purchase"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() => {
-              setEditingId(null);
-              setForm({
-                jenisLM: "Antam",
-                customJenisLM: "",
-                gramasi: "",
-                jumlah: 1,
-                hargaTotal: "",
-              });
-              setPage("purchase");
-            }}
-          >
-            Pembelian
-          </button>
+    <button
+      type="button"
+      className={
+        page === "dashboard"
+          ? "nav-button active"
+          : "nav-button"
+      }
+      onClick={() => {
+        setPage("dashboard");
+      }}
+    >
+      Dashboard
+    </button>
 
-          <button
-            className={
-              page === "sale"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() => {
-              setEditingId(null);
 
-              const firstBrand =
-                brandSummary[0]?.brand || "";
+    <button
+      type="button"
+      className={
+        page === "purchase"
+          ? "nav-button active"
+          : "nav-button"
+      }
+      onClick={() => {
+        setEditingId(null);
 
-              setSaleForm({
-                jenisLM: firstBrand,
-                gramasi: "",
-                jumlah: 1,
-                hargaTotal: "",
-              });
+        setForm({
+          jenisLM: "Antam",
+          customJenisLM: "",
+          gramasi: "",
+          jumlah: 1,
+          hargaTotal: "",
+        });
 
-              setPage("sale");
-            }}
-          >
-            Penjualan
-          </button>
+        setPage("purchase");
+      }}
+    >
+      Pembelian
+    </button>
 
-          <button
-            className={
-              page === "history"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() =>
-              setPage("history")
-            }
-          >
-            Riwayat
-          </button>
 
-          <button
-            className={
-              page === "profit"
-                ? "nav-button active"
-                : "nav-button"
-            }
-            onClick={() =>
-              setPage("profit")
-            }
-          >
-            Laba/Rugi
-          </button>
+    <button
+      type="button"
+      className={
+        page === "sale"
+          ? "nav-button active"
+          : "nav-button"
+      }
+      onClick={() => {
+        setEditingId(null);
 
-        </nav>
+        const firstBrand =
+          brandSummary[0]?.brand || "";
 
-        <div className="nav-actions">
+        setSaleForm({
+          jenisLM: firstBrand,
+          gramasi: "",
+          jumlah: 1,
+          hargaTotal: "",
+        });
 
-          {page === "dashboard" && (
-            <select
-              className="theme-select"
-              id="nav-dashboard-theme"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              aria-label="Pilih tema dashboard"
-            >
-              <option value="emerald">
-                Emerald
-              </option>
+        setPage("sale");
+      }}
+    >
+      Penjualan
+    </button>
 
-              <option value="dark-gold">
-                Dark Gold
-              </option>
 
-              <option value="midnight">
-                Midnight
-              </option>
-            </select>
-          )}
+    <button
+      type="button"
+      className={
+        page === "history"
+          ? "nav-button active"
+          : "nav-button"
+      }
+      onClick={() => {
+        setPage("history");
+      }}
+    >
+      Riwayat
+    </button>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={{
-              padding: "9px 14px",
-              border: "1px solid #d1d5db",
-              borderRadius: "8px",
-              background: "#ffffff",
-              color: "#374151",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
 
-        </div>
+    <button
+      type="button"
+      className={
+        page === "profit"
+          ? "nav-button active"
+          : "nav-button"
+      }
+      onClick={() => {
+        setPage("profit");
+      }}
+    >
+      Laba/Rugi
+    </button>
 
-      </header>
+  </nav>
+
+
+  <div className="nav-actions">
+
+    {page === "dashboard" && (
+      <select
+        className="theme-select"
+        id="nav-dashboard-theme"
+        value={theme}
+        onChange={(e) => setTheme(e.target.value)}
+        aria-label="Pilih tema dashboard"
+      >
+        <option value="emerald">
+          Emerald
+        </option>
+
+        <option value="dark-gold">
+          Dark Gold
+        </option>
+
+        <option value="midnight">
+          Midnight
+        </option>
+      </select>
+    )}
+
+
+    <button
+      type="button"
+      onClick={handleLogout}
+      style={{
+        padding: "9px 14px",
+        border: "1px solid #d1d5db",
+        borderRadius: "8px",
+        background: "#ffffff",
+        color: "#374151",
+        fontWeight: "600",
+        cursor: "pointer",
+      }}
+    >
+      Logout
+    </button>
+
+  </div>
+
+</header>
           
           </div>
           {page === "dashboard" && (
