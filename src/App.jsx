@@ -905,23 +905,7 @@ const saleDifferencePerGram =
   </div>
 
 </header>
-          </div>
-          {page === "dashboard" && (
-            <select
-              className="theme-select"
-              id="nav-dashboard-theme"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              aria-label="Pilih tema dashboard"
-            >
-                <option value="emerald">Emerald</option>
-                <option value="dark-gold">Dark Gold</option>
-                <option value="midnight">Midnight</option>
-              </select>
-          )}
-        </div>
-
-      </header>
+        
 
       <main className="main-container">
 
