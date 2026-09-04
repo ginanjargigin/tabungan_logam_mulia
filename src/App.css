@@ -1862,3 +1862,256 @@ footer {
     gap: 12px;
   }
 }
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+
+  /* =========================
+     HEADER
+  ========================= */
+
+  .topbar {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+
+
+  .brand {
+    width: 100%;
+    text-align: center;
+  }
+
+  .logo {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    margin-top: 4px;
+    font-size: 14px;
+  }
+
+
+  /* =========================
+     NAV ACTIONS
+  ========================= */
+
+  .nav-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .theme-select {
+    width: 100%;
+    max-width: 220px;
+  }
+
+
+  /* =========================
+     NAVIGATION
+  ========================= */
+
+  .nav-menu {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    overflow: visible;
+  }
+
+  .nav-button {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 6px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+
+  /* =========================
+     MAIN
+  ========================= */
+
+  .main-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 16px;
+    overflow-x: hidden;
+  }
+
+
+  /* =========================
+     HERO
+  ========================= */
+
+  .hero {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+    line-height: 1.1;
+  }
+
+  .hero-description {
+    font-size: 16px;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+
+
+  /* =========================
+     DASHBOARD STATS
+  ========================= */
+
+  .dashboard-stats {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .big-stat,
+  .stat-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* =========================
+     DASHBOARD GRID
+  ========================= */
+
+  .dashboard-grid {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* =========================
+     PURCHASE / SALE
+  ========================= */
+
+  .purchase-layout {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-card,
+  .purchase-info {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* =========================
+     HISTORY
+  ========================= */
+
+  .history-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .history-heading .primary-button {
+    width: 100%;
+  }
+
+  .history-item {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .history-detail {
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .history-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+
+  /* =========================
+     PROFIT
+  ========================= */
+
+  .profit-heading {
+    flex-direction: column;
+  }
+
+  .profit-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .profit-date-row {
+    grid-template-columns: 1fr;
+  }
+
+  .profit-row {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+
+  /* =========================
+     FOOTER
+  ========================= */
+
+  footer {
+    width: 100%;
+    text-align: center;
+    padding: 20px 16px;
+    font-size: 13px;
+  }
+
+}
