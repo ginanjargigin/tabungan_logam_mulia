@@ -48,7 +48,11 @@ function saveBrands(brands) {
   );
 }
 
-function App() {
+  function App() {
+  const isGuest =
+    sessionStorage.getItem("gold-save-mode") === "guest";
+
+  const handleLogout = async () => {
   const handleLogout = async () => {
     try {
       await fetch("/api/auth", {
@@ -69,8 +73,17 @@ function App() {
   const [transactions, setTransactions] =
     useState([]);
 
-  useEffect(() => {
+useEffect(() => {
   let mounted = true;
+
+  // Guest tidak mengambil data dari cloud
+  // maupun localStorage.
+  if (isGuest) {
+    setTransactions([]);
+    return () => {
+      mounted = false;
+    };
+  }
 
   const initializeData = async () => {
     const cloudData =
@@ -78,8 +91,6 @@ function App() {
 
     if (!mounted) return;
 
-    // Jika JSONBin memiliki data,
-    // gunakan data dari cloud.
     if (
       cloudData &&
       Array.isArray(
@@ -90,7 +101,6 @@ function App() {
         cloudData.transactions
       );
 
-      // Simpan juga sebagai backup lokal.
       localStorage.setItem(
         "gold-save-data",
         JSON.stringify(
@@ -101,15 +111,11 @@ function App() {
       return;
     }
 
-    // Jika cloud belum memiliki data,
-    // gunakan data lama dari localStorage.
     const localData =
       loadGoldData();
 
     if (localData.length > 0) {
       setTransactions(localData);
-
-      // Migrasikan data lama ke JSONBin.
       saveGoldData(localData);
     }
   };
@@ -119,7 +125,7 @@ function App() {
   return () => {
     mounted = false;
   };
-}, []);
+}, [isGuest]);
 
   const [brands, setBrands] =
     useState(loadBrands);
@@ -602,8 +608,11 @@ const saleDifferencePerGram =
       ...transactions,
     ];
 
-    setTransactions(updatedTransactions);
-    saveGoldData(updatedTransactions);
+  setTransactions(updatedTransactions);
+
+if (!isGuest) {
+  saveGoldData(updatedTransactions);
+}
 
     setSaleForm({
       jenisLM: "",
@@ -675,8 +684,11 @@ const saleDifferencePerGram =
       ];
     }
 
-    setTransactions(updatedTransactions);
-    saveGoldData(updatedTransactions);
+  setTransactions(updatedTransactions);
+
+if (!isGuest) {
+  saveGoldData(updatedTransactions);
+}
 
     if (
       form.jenisLM === "Lainnya" &&
@@ -717,8 +729,11 @@ const saleDifferencePerGram =
         (item) => item.id !== id
       );
 
-    setTransactions(updatedTransactions);
-    saveGoldData(updatedTransactions);
+  setTransactions(updatedTransactions);
+
+if (!isGuest) {
+  saveGoldData(updatedTransactions);
+}
   };
 
   const handleEdit = (transaction) => {
