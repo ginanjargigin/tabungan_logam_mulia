@@ -847,8 +847,6 @@ const saleDifferencePerGram =
 
         </nav>
 
-             </nav>
-
         <div className="nav-actions">
 
           {page === "dashboard" && (
