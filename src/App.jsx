@@ -746,7 +746,8 @@ const saleDifferencePerGram =
     <div
       className={`app theme-${theme}`}
     >
-     <header className="topbar">
+      
+      <header className="topbar">
 
   <div className="brand">
     <div className="logo">
@@ -904,7 +905,6 @@ const saleDifferencePerGram =
   </div>
 
 </header>
-          
           </div>
           {page === "dashboard" && (
             <select
