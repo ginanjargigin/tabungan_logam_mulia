@@ -2115,3 +2115,116 @@ footer {
   }
 
 }
+/* =========================
+   ANTAM PRICE
+========================= */
+
+.antam-price {
+  margin-top: 32px;
+  padding: 28px;
+  border: 1px solid #dfe5e1;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.antam-price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.antam-price-header h2 {
+  margin: 4px 0;
+  font-size: 24px;
+}
+
+.antam-price-header p:last-child {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.antam-badge {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #f5f1df;
+  color: #8a6d1d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.antam-price-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.antam-price-card {
+  padding: 22px;
+  border-radius: 16px;
+  background: #f8faf9;
+}
+
+.antam-price-card span,
+.antam-price-card small {
+  display: block;
+  color: #6b7280;
+}
+
+.antam-price-card strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 28px;
+}
+
+.antam-price-card.sell {
+  border: 1px solid #dce8df;
+}
+
+.antam-price-card.buyback {
+  border: 1px solid #eadfbd;
+}
+
+.antam-spread {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8f8f6;
+}
+
+.antam-spread span {
+  color: #6b7280;
+}
+
+.antam-spread strong {
+  margin-left: auto;
+}
+
+.antam-spread small {
+  color: #6b7280;
+}
+
+.antam-source {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.antam-source a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.antam-source a:hover {
+  text-decoration: underline;
+}
