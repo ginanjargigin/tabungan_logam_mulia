@@ -2114,145 +2114,120 @@ footer {
     font-size: 13px;
   }
 
-}
 /* =========================
-   ANTAM PRICE
+   ANTAM PRICE CARDS
 ========================= */
-
-.antam-price {
-  margin-top: 32px;
-  padding: 28px;
-  border: 1px solid #dfe5e1;
-  border-radius: 20px;
-  background: #ffffff;
-}
-
-.antam-price-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-.antam-price-header h2 {
-  margin: 4px 0;
-  font-size: 24px;
-}
-
-.antam-price-header p:last-child {
-  margin: 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.antam-badge {
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: #f5f1df;
-  color: #8a6d1d;
-  font-size: 12px;
-  font-weight: 700;
-}
 
 .antam-price-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 18px;
   margin-top: 24px;
 }
 
 .antam-price-card {
-  padding: 22px;
-  border-radius: 16px;
-  background: #f8faf9;
+  position: relative;
+  overflow: hidden;
+  padding: 26px;
+  min-height: 150px;
+  border-radius: 18px;
+  transition: transform 0.2s ease,
+              box-shadow 0.2s ease;
 }
 
-.antam-price-card span,
-.antam-price-card small {
-  display: block;
-  color: #6b7280;
+/* garis aksen atas */
+.antam-price-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
 }
+
+/* =========================
+   HARGA JUAL - ORANGE
+========================= */
+
+.antam-price-card.sell {
+  border: 1px solid #f2c6a5;
+  background: linear-gradient(
+    135deg,
+    #fff7f0,
+    #ffe8d5
+  );
+}
+
+.antam-price-card.sell::before {
+  background: #e9823a;
+}
+
+.antam-price-card.sell:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(233, 130, 58, 0.16);
+}
+
+
+/* =========================
+   BUYBACK - PINK
+========================= */
+
+.antam-price-card.buyback {
+  border: 1px solid #edbfd0;
+  background: linear-gradient(
+    135deg,
+    #fff7fa,
+    #f9dfe9
+  );
+}
+
+.antam-price-card.buyback::before {
+  background: #d86b91;
+}
+
+.antam-price-card.buyback:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(216, 107, 145, 0.16);
+}
+
+
+/* LABEL */
+
+.antam-price-card span {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* WARNA LABEL */
+
+.antam-price-card.sell span {
+  color: #b85d20;
+}
+
+.antam-price-card.buyback span {
+  color: #ad4f73;
+}
+
+
+/* HARGA */
 
 .antam-price-card strong {
   display: block;
-  margin: 8px 0 4px;
-  font-size: 28px;
+  margin-bottom: 6px;
+  font-size: 32px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #17201c;
 }
 
-.antam-price-card.sell {
-  background: #fff0e6;
-  border: 1px solid #dce8df;
-}
 
-.antam-price-card.buyback {
-  background: #fcecf3;
-  border: 1px solid #eadfbd;
-}
+/* SATUAN */
 
-.antam-spread {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  background: #f8f8f6;
-}
-
-.antam-spread span {
-  color: #6b7280;
-}
-
-.antam-spread strong {
-  margin-left: auto;
-}
-
-.antam-spread small {
-  color: #6b7280;
-}
-
-.antam-source {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
+.antam-price-card small {
+  display: block;
   font-size: 13px;
   color: #6b7280;
-}
-
-.antam-source a {
-  color: inherit;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.antam-source a:hover {
-  text-decoration: underline;
-}
-@media (max-width: 768px) {
-  .antam-price {
-    padding: 20px;
-  }
-
-  .antam-price-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .antam-price-card strong {
-    font-size: 24px;
-  }
-
-  .antam-source {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .antam-spread {
-    flex-wrap: wrap;
-  }
-
-  .antam-spread strong {
-    margin-left: 0;
-  }
 }
