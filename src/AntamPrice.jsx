@@ -69,7 +69,7 @@ function AntamPrice() {
 
       <div className="antam-spread">
         <span>
-          Selisih harga jual & buyback
+          Selisih harga jual & buyback 
         </span>
 
         <strong>
@@ -77,7 +77,7 @@ function AntamPrice() {
         </strong>
 
         <small>
-          per gram
+           per gram
         </small>
       </div>
 
@@ -91,7 +91,7 @@ function AntamPrice() {
           target="_blank"
           rel="noreferrer"
         >
-          Lihat harga resmi →
+          Lihat harga resmi → 
         </a>
       </div>
 
