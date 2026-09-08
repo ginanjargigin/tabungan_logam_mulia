@@ -2302,21 +2302,28 @@ footer {
 
 /* SELISIH */
 
-.antam-spread span {
-  font-size: 13px;
-  line-height: 1.4;
+.antam-spread {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #f7f8f7;
+  border: 1px solid #e5e8e6;
 }
 
 .antam-spread strong {
+  margin-left: auto;
   font-size: 16px;
-  line-height: 1.4;
   font-weight: 700;
 }
 
 .antam-spread small {
+  margin-left: 2px;
+  color: #7a837f;
   font-size: 12px;
 }
-
 
 /* SUMBER */
 
