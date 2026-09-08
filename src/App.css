@@ -2232,6 +2232,104 @@ footer {
   color: #6b7280;
 }
 /* =========================
+   ANTAM TYPOGRAPHY
+========================= */
+
+.antam-price-header h2 {
+  margin: 4px 0 6px;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.antam-price-header p:last-child {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #7a837f;
+}
+
+
+/* LABEL HARGA ANTAM */
+
+.antam-price .eyebrow {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+
+/* BADGE ANTAM */
+
+.antam-badge {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f7efd9;
+  border: 1px solid #ead9aa;
+  color: #8b6a20;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+
+/* KARTU HARGA */
+
+.antam-price-card span {
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.antam-price-card strong {
+  margin: 6px 0 4px;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.antam-price-card small {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #737b78;
+}
+
+
+/* SELISIH */
+
+.antam-spread span {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.antam-spread strong {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.antam-spread small {
+  font-size: 12px;
+}
+
+
+/* SUMBER */
+
+.antam-source {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.antam-source a {
+  font-size: 12px;
+  font-weight: 600;
+}
+/* =========================
    ANTAM PRICE - MOBILE
 ========================= */
 
