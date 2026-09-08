@@ -2328,13 +2328,27 @@ footer {
 /* SUMBER */
 
 .antam-source {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
   font-size: 12px;
   line-height: 1.4;
+  color: #6b7280;
 }
 
 .antam-source a {
+  margin-left: auto;
+  color: #526f65;
   font-size: 12px;
   font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.antam-source a:hover {
+  text-decoration: underline;
 }
 /* =========================
    ANTAM PRICE - MOBILE
