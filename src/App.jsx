@@ -9,6 +9,7 @@ import {
   loadGoldDataFromCloud,
   saveGoldData,
 } from "./storage";
+import AntamPrice from "./AntamPrice";
 
 const DEFAULT_BRANDS = [
   "Antam",
@@ -1187,6 +1188,8 @@ function Dashboard({
         </div>
 
       </section>
+
+      <AntamPrice />
 
       <section className="dashboard-grid">
 
