@@ -2331,11 +2331,8 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
   margin-top: 20px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: #6b7280;
 }
 
 .antam-source a {
