@@ -1,3 +1,4 @@
+import React from "react";
 function AntamPrice() {
   const hargaJual = 2627000;
   const hargaBuyback = 2480000;
