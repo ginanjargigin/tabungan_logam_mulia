@@ -2234,7 +2234,11 @@ footer {
 /* =========================
    ANTAM TYPOGRAPHY
 ========================= */
-
+.antam-price-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .antam-price-header h2 {
   margin: 4px 0 6px;
   font-size: 26px;
