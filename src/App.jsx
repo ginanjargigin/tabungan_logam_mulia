@@ -48,9 +48,12 @@ function saveBrands(brands) {
   );
 }
 
-  function App() {
-  const isGuest =
-    sessionStorage.getItem("gold-save-mode") === "guest";
+function App() {
+  const mode =
+    sessionStorage.getItem("gold-save-mode");
+
+  const isGuest = mode === "guest";
+  const isUser = mode === "user";
 
   const handleLogout = async () => {
  
@@ -69,6 +72,52 @@ function saveBrands(brands) {
       window.location.reload();
     }
   };
+  // =========================
+  // AUTO LOGOUT 30 MENIT
+  // =========================
+  useEffect(() => {
+    if (!isUser) return;
+
+    const TIMEOUT = 120 * 60 * 1000;
+    let timer;
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+        handleLogout();
+      }, TIMEOUT);
+    };
+
+    const events = [
+      "mousedown",
+      "mousemove",
+      "keydown",
+      "scroll",
+      "touchstart",
+      "click",
+    ];
+
+    events.forEach((event) => {
+      window.addEventListener(
+        event,
+        resetTimer
+      );
+    });
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(timer);
+
+      events.forEach((event) => {
+        window.removeEventListener(
+          event,
+          resetTimer
+        );
+      });
+    };
+  }, [isUser]);
 
   const [transactions, setTransactions] =
     useState([]);
