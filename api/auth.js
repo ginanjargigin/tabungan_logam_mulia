@@ -206,11 +206,9 @@ export default async function handler(
 
       const session = createSession();
 
-      response.setHeader(
+          response.setHeader(
         "Set-Cookie",
-        `${COOKIE_NAME}=${session}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${
-          SESSION_DURATION / 1000
-        }`
+        `${COOKIE_NAME}=${session}; Path=/; HttpOnly; Secure; SameSite=Strict`
       );
 
       return response.status(200).json({
