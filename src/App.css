@@ -2180,10 +2180,12 @@ footer {
 }
 
 .antam-price-card.sell {
+  background: #f8efd0;
   border: 1px solid #dce8df;
 }
 
 .antam-price-card.buyback {
+  background: #e8f2ee;
   border: 1px solid #eadfbd;
 }
 
